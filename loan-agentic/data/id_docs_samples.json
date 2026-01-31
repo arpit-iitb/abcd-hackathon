@@ -1,0 +1,87 @@
+[
+  {
+    "lead_id": "L-1001",
+    "aadhaar_doc": {
+      "image_path": "data/images/L-1001_aadhaar.png"
+    },
+    "selfie_doc": {
+      "image_path": "data/images/L-1001_selfie.png"
+    },
+    "aadhaar_image_file": "data/images/L-1001_aadhaar.png",
+    "selfie_image_file": "data/images/L-1001_selfie.png",
+    "pan_doc": {
+      "parsed_json": {
+        "pan_masked": "XXXXXX1234",
+        "name": "Parag Bajaj"
+      }
+    }
+  },
+  {
+    "lead_id": "L-2002",
+    "aadhaar_doc": {
+      "image_path": "data/images/L-2002_aadhaar.png"
+    },
+    "selfie_doc": {
+      "image_path": "data/images/L-2002_selfie.png"
+    },
+    "aadhaar_image_file": "data/images/L-2002_aadhaar.png",
+    "selfie_image_file": "data/images/L-2002_selfie.png",
+    "pan_doc": {
+      "parsed_json": {
+        "pan_masked": "XXXXXX6789",
+        "name": "Nina Kapoor"
+      }
+    }
+  },
+  {
+    "lead_id": "L-1002",
+    "aadhaar_doc": {
+      "image_path": "data/images/L-1002_aadhaar.png"
+    },
+    "selfie_doc": {
+      "image_path": "data/images/L-1002_selfie.png"
+    },
+    "aadhaar_image_file": "data/images/L-1002_aadhaar.png",
+    "selfie_image_file": "data/images/L-1002_selfie.png",
+    "pan_doc": {
+      "parsed_json": {
+        "pan_masked": "XXXXXX5678",
+        "name": "Arjun Mehta"
+      }
+    }
+  },
+  {
+    "lead_id": "L-1003",
+    "aadhaar_doc": {
+      "image_path": "data/images/L-1003_aadhaar.png"
+    },
+    "selfie_doc": {
+      "image_path": "data/images/L-1003_selfie.png"
+    },
+    "aadhaar_image_file": "data/images/L-1003_aadhaar.png",
+    "selfie_image_file": "data/images/L-1003_selfie.png",
+    "pan_doc": {
+      "parsed_json": {
+        "pan_masked": "XXXXXX2468",
+        "name": "Sana Khan"
+      }
+    }
+  },
+  {
+    "lead_id": "L-3003",
+    "aadhaar_doc": {
+      "image_path": "data/images/L-3003_aadhaar.png"
+    },
+    "selfie_doc": {
+      "image_path": "data/images/L-3003_selfie.png"
+    },
+    "aadhaar_image_file": "data/images/L-3003_aadhaar.png",
+    "selfie_image_file": "data/images/L-3003_selfie.png",
+    "pan_doc": {
+      "parsed_json": {
+        "pan_masked": "XXXXXX1357",
+        "name": "Vikram Joshi"
+      }
+    }
+  }
+]

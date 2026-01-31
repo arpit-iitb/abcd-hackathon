@@ -1,0 +1,10 @@
+default_use_llm: true
+agents:
+  lead_sourcing: false
+  bureau: true
+  bank_statement: true
+  id_verification: true
+  payslip: true
+  fraud: true
+  risk_assessment: true
+  approval: true

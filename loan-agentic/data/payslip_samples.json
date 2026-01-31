@@ -1,0 +1,52 @@
+[
+  {
+    "lead_id": "L-1001",
+    "payslip_doc": {
+      "parsed_json": {
+        "net_salary": 58000,
+        "employer_name": "Piramal Finance Ltd",
+        "pay_date": "2025-12-01"
+      }
+    }
+  },
+  {
+    "lead_id": "L-1002",
+    "payslip_doc": {
+      "parsed_json": {
+        "net_salary": 75000,
+        "employer_name": "Nimbus Software Pvt Ltd",
+        "pay_date": "2025-12-01"
+      }
+    }
+  },
+  {
+    "lead_id": "L-1003",
+    "payslip_doc": {
+      "parsed_json": {
+        "net_salary": 52000,
+        "employer_name": "Metro Health Services",
+        "pay_date": "2025-12-01"
+      }
+    }
+  },
+  {
+    "lead_id": "L-2002",
+    "payslip_doc": {
+      "parsed_json": {
+        "net_salary": 45000,
+        "employer_name": "Kapoor Traders",
+        "pay_date": "2025-12-01"
+      }
+    }
+  },
+  {
+    "lead_id": "L-3003",
+    "payslip_doc": {
+      "parsed_json": {
+        "net_salary": 90000,
+        "employer_name": "Skyline Logistics",
+        "pay_date": "2025-12-01"
+      }
+    }
+  }
+]

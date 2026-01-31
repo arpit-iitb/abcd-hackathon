@@ -1,0 +1,29 @@
+# Thresholds and weights for loan journey decisions
+risk:
+  min_bureau_score: 650
+  max_bureau_score: 900
+  max_dti: 0.45
+  min_salary: 25000
+  max_foir: 0.50
+  annual_interest_rate: 0.18
+  min_employment_tenure_months: 12
+  max_employment_tenure_months: 120
+  max_bank_balance: 100000
+fraud:
+  max_name_mismatch: 0.2
+  max_address_mismatch: 0.3
+  max_fraud_score: 0.3
+approval:
+  min_approval_score: 0.70
+  max_risk_score: 0.35
+weights:
+  bureau_score: 0.5
+  income_stability: 0.2
+  bank_balance: 0.2
+  employment_tenure: 0.1
+required_fields:
+  lead: [first_name, last_name, phone, email, requested_amount, tenure_months]
+  id: [aadhaar, pan, full_name]
+  bureau: [score, delinquencies]
+  bank: [avg_monthly_balance, monthly_income, monthly_obligations]
+  payslip: [net_salary, employer_name, employment_tenure_months]

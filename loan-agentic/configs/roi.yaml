@@ -1,0 +1,4 @@
+roi_by_risk:
+  low: 0.13
+  medium: 0.16
+  high: 0.19

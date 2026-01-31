@@ -1,0 +1,27 @@
+default:
+  model: gpt-4o
+  temperature: 0.1
+lead_sourcing:
+  model: gpt-4o
+  temperature: 0.1
+bureau:
+  model: gpt-5.1
+  temperature: 0.1
+bank_statement:
+  model: gpt-4o
+  temperature: 0.1
+id_verification:
+  model: gpt-4o
+  temperature: 0.0
+payslip:
+  model: gpt-5.1
+  temperature: 0.1
+fraud:
+  model: gpt-5.2
+  temperature: 0.1
+risk_assessment:
+  model: gpt-4o
+  temperature: 0.1
+approval:
+  model: gpt-5.2
+  temperature: 0.05

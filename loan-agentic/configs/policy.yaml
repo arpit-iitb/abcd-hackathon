@@ -1,0 +1,9 @@
+lead_filter:
+  allowed_tiers: ["tier1", "metro"]
+  allowed_product_types: ["personal_loan"]
+  allowed_loan_purposes: ["personal_loan"]
+  max_requested_amount: 200000
+sanction_policy:
+  max_multiplier_of_avg_balance: 10.0
+  cap_amount: 500000
+  min_amount: 5000

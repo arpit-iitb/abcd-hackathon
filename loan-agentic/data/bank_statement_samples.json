@@ -1,0 +1,117 @@
+[
+  {
+    "lead_id": "L-1001",
+    "transactions": [
+      {"date": "2025-12-01", "narration": "Salary Credit", "amount": 58000, "balance": 92000},
+      {"date": "2025-12-02", "narration": "Grocery", "amount": -3500, "balance": 88500},
+      {"date": "2025-12-03", "narration": "Fuel", "amount": -2200, "balance": 86300},
+      {"date": "2025-12-04", "narration": "Dining", "amount": -1800, "balance": 84500},
+      {"date": "2025-12-05", "narration": "Rent", "amount": -18000, "balance": 66500},
+      {"date": "2025-12-06", "narration": "Utilities", "amount": -2500, "balance": 64000},
+      {"date": "2025-12-07", "narration": "Pharmacy", "amount": -900, "balance": 63100},
+      {"date": "2025-12-08", "narration": "Casino", "amount": -5000, "balance": 58100},
+      {"date": "2025-12-09", "narration": "Grocery", "amount": -2100, "balance": 56000},
+      {"date": "2025-12-10", "narration": "Mobile Bill", "amount": -1200, "balance": 54800},
+      {"date": "2025-12-12", "narration": "Online Shopping", "amount": -3200, "balance": 51600},
+      {"date": "2025-12-14", "narration": "Transfer", "amount": -4000, "balance": 47600},
+      {"date": "2025-12-16", "narration": "Travel", "amount": -2800, "balance": 44800},
+      {"date": "2025-12-18", "narration": "Grocery", "amount": -1900, "balance": 42900},
+      {"date": "2025-12-20", "narration": "Dining", "amount": -1500, "balance": 41400},
+      {"date": "2025-12-22", "narration": "Fuel", "amount": -2100, "balance": 39300},
+      {"date": "2025-12-25", "narration": "Bonus", "amount": 5000, "balance": 44300},
+      {"date": "2025-12-28", "narration": "Grocery", "amount": -1600, "balance": 42700}
+    ]
+  },
+  {
+    "lead_id": "L-1002",
+    "transactions": [
+      {"date": "2025-12-01", "narration": "Salary Credit", "amount": 75000, "balance": 120000},
+      {"date": "2025-12-02", "narration": "Grocery", "amount": -4200, "balance": 115800},
+      {"date": "2025-12-03", "narration": "Fuel", "amount": -2600, "balance": 113200},
+      {"date": "2025-12-04", "narration": "Dining", "amount": -2400, "balance": 110800},
+      {"date": "2025-12-05", "narration": "Rent", "amount": -25000, "balance": 85800},
+      {"date": "2025-12-06", "narration": "Utilities", "amount": -3200, "balance": 82600},
+      {"date": "2025-12-07", "narration": "Grocery", "amount": -3100, "balance": 79500},
+      {"date": "2025-12-08", "narration": "Crypto Exchange", "amount": -8000, "balance": 71500},
+      {"date": "2025-12-09", "narration": "Pharmacy", "amount": -1100, "balance": 70400},
+      {"date": "2025-12-10", "narration": "Mobile Bill", "amount": -1500, "balance": 68900},
+      {"date": "2025-12-12", "narration": "Online Shopping", "amount": -4500, "balance": 64400},
+      {"date": "2025-12-14", "narration": "Transfer", "amount": -3000, "balance": 61400},
+      {"date": "2025-12-16", "narration": "Travel", "amount": -5200, "balance": 56200},
+      {"date": "2025-12-18", "narration": "Grocery", "amount": -2800, "balance": 53400},
+      {"date": "2025-12-20", "narration": "Dining", "amount": -2100, "balance": 51300},
+      {"date": "2025-12-22", "narration": "Fuel", "amount": -2300, "balance": 49000},
+      {"date": "2025-12-25", "narration": "Bonus", "amount": 7000, "balance": 56000},
+      {"date": "2025-12-28", "narration": "Grocery", "amount": -2500, "balance": 53500}
+    ]
+  },
+  {
+    "lead_id": "L-1003",
+    "transactions": [
+      {"date": "2025-12-01", "narration": "Salary Credit", "amount": 52000, "balance": 78000},
+      {"date": "2025-12-02", "narration": "Grocery", "amount": -3200, "balance": 74800},
+      {"date": "2025-12-03", "narration": "Fuel", "amount": -2000, "balance": 72800},
+      {"date": "2025-12-04", "narration": "Dining", "amount": -1700, "balance": 71100},
+      {"date": "2025-12-05", "narration": "Rent", "amount": -16000, "balance": 55100},
+      {"date": "2025-12-06", "narration": "Utilities", "amount": -2300, "balance": 52800},
+      {"date": "2025-12-07", "narration": "Grocery", "amount": -1900, "balance": 50900},
+      {"date": "2025-12-08", "narration": "Pharmacy", "amount": -1200, "balance": 49700},
+      {"date": "2025-12-09", "narration": "Online Shopping", "amount": -2600, "balance": 47100},
+      {"date": "2025-12-10", "narration": "Mobile Bill", "amount": -1400, "balance": 45700},
+      {"date": "2025-12-12", "narration": "Transfer", "amount": -2200, "balance": 43500},
+      {"date": "2025-12-14", "narration": "Travel", "amount": -2400, "balance": 41100},
+      {"date": "2025-12-16", "narration": "Grocery", "amount": -1800, "balance": 39300},
+      {"date": "2025-12-18", "narration": "Dining", "amount": -1600, "balance": 37700},
+      {"date": "2025-12-20", "narration": "Fuel", "amount": -2000, "balance": 35700},
+      {"date": "2025-12-22", "narration": "Pharmacy", "amount": -1100, "balance": 34600},
+      {"date": "2025-12-25", "narration": "Bonus", "amount": 3000, "balance": 37600},
+      {"date": "2025-12-28", "narration": "Grocery", "amount": -1500, "balance": 36100}
+    ]
+  },
+  {
+    "lead_id": "L-2002",
+    "transactions": [
+      {"date": "2025-12-01", "narration": "Payroll", "amount": 45000, "balance": 60000},
+      {"date": "2025-12-02", "narration": "Supplies", "amount": -6000, "balance": 54000},
+      {"date": "2025-12-03", "narration": "Client Payment", "amount": 12000, "balance": 66000},
+      {"date": "2025-12-04", "narration": "Rent", "amount": -15000, "balance": 51000},
+      {"date": "2025-12-05", "narration": "Utilities", "amount": -2500, "balance": 48500},
+      {"date": "2025-12-06", "narration": "Fuel", "amount": -1800, "balance": 46700},
+      {"date": "2025-12-07", "narration": "Grocery", "amount": -2200, "balance": 44500},
+      {"date": "2025-12-08", "narration": "Client Payment", "amount": 8000, "balance": 52500},
+      {"date": "2025-12-09", "narration": "Supplies", "amount": -3000, "balance": 49500},
+      {"date": "2025-12-10", "narration": "Transfer", "amount": -2500, "balance": 47000},
+      {"date": "2025-12-12", "narration": "Utilities", "amount": -2000, "balance": 45000},
+      {"date": "2025-12-14", "narration": "Fuel", "amount": -1500, "balance": 43500},
+      {"date": "2025-12-16", "narration": "Supplies", "amount": -2800, "balance": 40700},
+      {"date": "2025-12-18", "narration": "Client Payment", "amount": 6000, "balance": 46700},
+      {"date": "2025-12-20", "narration": "Rent", "amount": -8000, "balance": 38700},
+      {"date": "2025-12-22", "narration": "Grocery", "amount": -1800, "balance": 36900},
+      {"date": "2025-12-25", "narration": "Bonus", "amount": 3000, "balance": 39900},
+      {"date": "2025-12-28", "narration": "Utilities", "amount": -1900, "balance": 38000}
+    ]
+  },
+  {
+    "lead_id": "L-3003",
+    "transactions": [
+      {"date": "2025-12-01", "narration": "Salary Credit", "amount": 90000, "balance": 140000},
+      {"date": "2025-12-02", "narration": "Grocery", "amount": -5200, "balance": 134800},
+      {"date": "2025-12-03", "narration": "Fuel", "amount": -3100, "balance": 131700},
+      {"date": "2025-12-04", "narration": "Dining", "amount": -2800, "balance": 128900},
+      {"date": "2025-12-05", "narration": "Rent", "amount": -30000, "balance": 98900},
+      {"date": "2025-12-06", "narration": "Utilities", "amount": -4200, "balance": 94700},
+      {"date": "2025-12-07", "narration": "Betting", "amount": -12000, "balance": 82700},
+      {"date": "2025-12-08", "narration": "Pharmacy", "amount": -1500, "balance": 81200},
+      {"date": "2025-12-09", "narration": "Online Shopping", "amount": -6800, "balance": 74400},
+      {"date": "2025-12-10", "narration": "Mobile Bill", "amount": -2200, "balance": 72200},
+      {"date": "2025-12-12", "narration": "Transfer", "amount": -5400, "balance": 66800},
+      {"date": "2025-12-14", "narration": "Travel", "amount": -9000, "balance": 57800},
+      {"date": "2025-12-16", "narration": "Grocery", "amount": -3600, "balance": 54200},
+      {"date": "2025-12-18", "narration": "Dining", "amount": -3000, "balance": 51200},
+      {"date": "2025-12-20", "narration": "Fuel", "amount": -3200, "balance": 48000},
+      {"date": "2025-12-22", "narration": "Pharmacy", "amount": -1700, "balance": 46300},
+      {"date": "2025-12-25", "narration": "Bonus", "amount": 7000, "balance": 53300},
+      {"date": "2025-12-28", "narration": "Grocery", "amount": -2900, "balance": 50400}
+    ]
+  }
+]

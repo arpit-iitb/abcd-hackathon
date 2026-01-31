@@ -1,0 +1,9 @@
+{
+  "first_name": "Parag",
+  "last_name": "Bajaj",
+  "phone": "+91-9876543210",
+  "email": "parag.bajaj@example.com",
+  "requested_amount": 250000,
+  "tenure_months": 24,
+  "city": "Bengaluru"
+}

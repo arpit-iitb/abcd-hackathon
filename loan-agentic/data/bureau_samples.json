@@ -1,0 +1,72 @@
+[
+  {
+    "lead_id": "L-1001",
+    "raw": {
+      "provider": "demo_bureau",
+      "report_id": "BR-001",
+      "enquiry_count_30_days": 1,
+      "repayment_history": "0, 0, 0, 0",
+      "score": 705
+    },
+    "normalized": {
+      "score": 705,
+      "delinquencies": 0
+    }
+  },
+  {
+    "lead_id": "L-1002",
+    "raw": {
+      "provider": "demo_bureau",
+      "report_id": "BR-002",
+      "enquiry_count_30_days": 4,
+      "repayment_history": "0, 30, 0, 0",
+      "score": 680
+    },
+    "normalized": {
+      "score": 680,
+      "delinquencies": 1
+    }
+  },
+  {
+    "lead_id": "L-1003",
+    "raw": {
+      "provider": "demo_bureau",
+      "report_id": "BR-003",
+      "enquiry_count_30_days": 6,
+      "repayment_history": "60, 90, 30",
+      "score": 620
+    },
+    "normalized": {
+      "score": 620,
+      "delinquencies": 2
+    }
+  },
+  {
+    "lead_id": "L-2002",
+    "raw": {
+      "provider": "demo_bureau",
+      "report_id": "BR-004",
+      "enquiry_count_30_days": 3,
+      "repayment_history": "0, 0, 0",
+      "score": 690
+    },
+    "normalized": {
+      "score": 690,
+      "delinquencies": 0
+    }
+  },
+  {
+    "lead_id": "L-3003",
+    "raw": {
+      "provider": "demo_bureau",
+      "report_id": "BR-005",
+      "enquiry_count_30_days": 2,
+      "repayment_history": "0, 0, 0, 0",
+      "score": 700
+    },
+    "normalized": {
+      "score": 700,
+      "delinquencies": 0
+    }
+  }
+]
