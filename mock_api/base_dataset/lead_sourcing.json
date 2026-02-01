@@ -11,6 +11,11 @@
         "city": "Bengaluru",
         "employer": "Acme Corp",
         "loan_requested_amount": 250000
+      },
+      "documents": {
+        "aadhar_image": "/images/adhaar/1234-5678-9012.png",
+        "selfie_image": "/images/selfie/L-1001_selfie.png",
+        "payslip_pdf": "/images/payslip/L-1001_payslip.pdf"
       }
     }
   },
@@ -26,6 +31,11 @@
         "city": "Mumbai",
         "employer": "Nimbus Labs",
         "loan_requested_amount": 500000
+      },
+      "documents": {
+        "aadhar_image": "/images/adhaar/9876-5432-1098.png",
+        "selfie_image": "/images/selfie/L-2002_selfie.png",
+        "payslip_pdf": "/images/payslip/L-2002_payslip.pdf"
       }
     }
   }

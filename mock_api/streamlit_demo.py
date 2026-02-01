@@ -121,3 +121,9 @@ if submitted:
                     else:
                         st.success("Bureau report received.")
                         st.json(payload)
+                        if doc_type == "Lead Sourcing" and isinstance(payload, dict):
+                            documents = payload.get("documents")
+                            if isinstance(documents, dict):
+                                st.subheader("Document URLs")
+                                for key, value in documents.items():
+                                    st.text_input(key.replace("_", " ").title(), value=str(value), key=f"doc_{key}")
