@@ -76,3 +76,35 @@ The LangGraph workflow runs these nodes in order:
 python -m venv .venv python=3.10
 source .venv/bin/activate  # (Windows) .venv\Scripts\activate
 pip install -r requirements.txt
+
+## Deployment
+
+The project is deployed and publicly accessible on **Streamlit**:
+
+👉 **[ABCD – Any Body Can Disburse](https://abcd-agent-hackathon.streamlit.app/)**
+
+You can run the live app and observe the full multi-agent decision workflow end-to-end.
+
+---
+
+## About the Authors
+
+### **Arpit Upadhyay**
+- **Role:** Data Scientist, Piramal Finance  
+- **Education:** B.Tech in Mechanical Engineering, IIT Bombay (Class of 2024)  
+- **Interests:** Data Science, Reinforcement Learning, Agentic AI  
+
+---
+
+### **Parag Bajaj**
+- **Role:** Senior GenAI Solutions Architect, Piramal Finance  
+- **Education:** B.Tech in Mechanical Engineering, IIT Bombay (Class of 2023)  
+- **Interests:** Generative AI, Machine Learning, Cloud Security  
+
+---
+
+### **Ayushmaan Pandey**
+- **Role:** Data Scientist, Piramal Finance  
+- **Education:** B.Tech in Electrical Engineering, IIT Delhi (Class of 2025)  
+- **Interests:** Data Science, Finance, Rust  
+
