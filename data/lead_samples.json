@@ -29,36 +29,7 @@
     "employment_type": "self_employed",
     "declared_income": 45000
   },
-  {
-    "lead_id": "L-1002",
-    "name": "Arjun Mehta",
-    "city": "Mumbai",
-    "tier": "tier1",
-    "loan_purpose": "personal_loan",
-    "requested_amount": 180000,
-    "product_type": "personal_loan",
-    "phone": "+91-9876511111",
-    "email": "arjun.mehta@example.com",
-    "aadhaar_last4": "5678",
-    "pan_masked": "XXXXXX5678",
-    "employment_type": "salaried",
-    "declared_income": 75000
-  },
-  {
-    "lead_id": "L-1003",
-    "name": "Sana Khan",
-    "city": "Delhi",
-    "tier": "metro",
-    "loan_purpose": "personal_loan",
-    "requested_amount": 95000,
-    "product_type": "personal_loan",
-    "phone": "+91-9876522222",
-    "email": "sana.khan@example.com",
-    "aadhaar_last4": "2468",
-    "pan_masked": "XXXXXX2468",
-    "employment_type": "salaried",
-    "declared_income": 52000
-  },
+ 
   {
     "lead_id": "L-3003",
     "name": "Vikram Joshi",
