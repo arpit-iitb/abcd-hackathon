@@ -26,11 +26,6 @@ OPENAI_TEMPERATURE=0.1
 python -m app.run_pipeline --config-dir .\configs --prompt-dir .\prompts --sample-dir .\data
 ```
 
-## Run Streamlit
-```powershell
-streamlit run .\streamlit_app.py
-```
-
 ## Run Demo Dashboard
 ```powershell
 streamlit run .\streamlit_demo.py
@@ -38,7 +33,7 @@ streamlit run .\streamlit_demo.py
 
 ## Notes
 - `.env` is ignored by git. Do not commit secrets.
-- Aadhaar + selfie images are expected as PNG/JPG files under `data/images/` (see `data/images/README.txt`). Images are converted to compressed JPEG before sending to the LLM to reduce token size.
+- Aadhaar + selfie images are expected as PNG/JPG files under `data/images/`. Images are converted to compressed JPEG before sending to the LLM to reduce token size.
 - Per-agent LLM model/temperature can be set in `configs/models.yaml`.
 - LLM usage per agent is controlled in `configs/llm.yaml`. Set an agent to `false` to use rule-based fallbacks (useful for tests/offline runs).
 - This is a hello pipeline stub; extend `app/graph.py` and `agents/` for full orchestration.

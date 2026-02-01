@@ -77,9 +77,6 @@ def run_payslip(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[s
     if monthly_income_estimate is None:
         missing_data.append("payslip.net_pay")
 
-    if not missing_data and llm_enabled(config, "payslip"):
-        return run_llm_agent("payslip", mask_sensitive(payload), config, prompts)
-
     output_payload = {
         "monthly_income_estimate": monthly_income_estimate,
         "pay_date": pay_date,
@@ -104,4 +101,22 @@ def run_payslip(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[s
         confidence=0.9 if not missing_data else 0.4,
         output=output_payload,
     )
-    return result.model_dump(mode="json")
+    rule_result = result.model_dump(mode="json")
+
+    if not missing_data and llm_enabled(config, "payslip"):
+        llm_result = run_llm_agent("payslip", mask_sensitive(payload), config, prompts)
+        if isinstance(llm_result, dict) and llm_result.get("status") == "ok":
+            return llm_result
+        if isinstance(llm_result, dict) and llm_result.get("errors"):
+            rule_result.setdefault("errors", []).append(
+                {
+                    "code": "llm_fallback",
+                    "message": "LLM parse/validation failed; returning rule-based payslip result.",
+                    "where": "payslip.llm",
+                    "severity": "warning",
+                }
+            )
+            rule_result["rationale_summary"] = list(rule_result.get("rationale_summary", [])) + [
+                "LLM output invalid; used rule-based parsed_json."
+            ]
+    return rule_result

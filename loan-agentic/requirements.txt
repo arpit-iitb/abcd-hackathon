@@ -6,8 +6,6 @@ langgraph-checkpoint-sqlite==0.1.14
 langchain==0.3.7
 langchain-openai==0.2.9
 rich==13.7.1
-pytest==8.3.1
 streamlit==1.38.0
 Jinja2==3.1.4
 openai==1.59.0
-dotenv

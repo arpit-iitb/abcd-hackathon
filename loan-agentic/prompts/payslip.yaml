@@ -6,6 +6,8 @@ system: |
   You must:
   - Prefer net_pay; fallback to gross_pay.
   - If only image_base64 present, return insufficient_data with "OCR not enabled in demo".
+  - Output MUST be valid JSON matching AgentResultBase with all required top-level keys.
+  - Do NOT output chain-of-thought; provide rationale_summary bullets only.
 
 user_template: |
   INPUT_JSON: {{input_json}}
@@ -13,7 +15,19 @@ user_template: |
   TASK:
   - Extract monthly_income_estimate, pay_date, employer.
 
-  OUTPUT_JSON_SCHEMA (AgentResultBase):
-  - output.monthly_income_estimate
-  - output.pay_date
-  - output.employer
+  OUTPUT_JSON_SCHEMA (FULL AgentResultBase):
+  {
+    "agent_name": "payslip",
+    "status": "ok|insufficient_data|error",
+    "errors": [{"code": "", "message": "", "where": "", "severity": "warning|fatal"}],
+    "missing_data": [],
+    "rationale_summary": [],
+    "evidence": {},
+    "calculations": {},
+    "confidence": 0.0,
+    "output": {
+      "monthly_income_estimate": 0,
+      "pay_date": "",
+      "employer": ""
+    }
+  }
