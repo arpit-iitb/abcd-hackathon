@@ -146,7 +146,9 @@ def run_id_verification(payload: Dict[str, Any], config: Dict[str, Any], prompts
         # Use raw payload so OCR/face matching can consume image_base64.
         return run_llm_agent("id_verification", payload, config, prompts)
 
+    summary = f"Name match={match_boolean} (score {match_score:.2f}); Face match={face_match_boolean}."
     output_payload = {
+        "summary": summary,
         "name_match": match_boolean,
         "match_score": match_score,
         "extracted_name": extracted_name,

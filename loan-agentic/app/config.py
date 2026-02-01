@@ -52,6 +52,7 @@ REQUIRED_KEYS = {
     "suspicious_keywords": ["keywords"],
     "roi": ["roi_by_risk.low", "roi_by_risk.medium", "roi_by_risk.high"],
     "models": ["default.model", "default.temperature"],
+    "web_search": ["enabled", "provider"],
 }
 
 

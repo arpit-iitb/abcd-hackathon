@@ -47,11 +47,13 @@ def run_fraud(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[str
     payslip_result = payload.get("payslip") or {}
     id_result = payload.get("id_verification") or {}
     bureau_result = payload.get("bureau") or {}
+    web_search_result = payload.get("web_search") or {}
 
     bank_output = _get_output(bank_result)
     payslip_output = _get_output(payslip_result)
     id_output = _get_output(id_result)
     bureau_output = _get_output(bureau_result)
+    web_output = _get_output(web_search_result)
 
     bank_salary = bank_output.get("salary_estimate")
     payslip_income = payslip_output.get("monthly_income_estimate")
@@ -137,7 +139,9 @@ def run_fraud(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[str
     if diff_ratio is not None and diff_ratio > tolerance and desperate_flag and str(suspicious_grade).lower() == "high":
         fraud_grade = "fraudulent"
 
+    summary = f"Fraud grade: {fraud_grade}. Income mismatch ratio={diff_ratio:.2f}." if diff_ratio is not None else f"Fraud grade: {fraud_grade}."
     output_payload = {
+        "summary": summary,
         "fraud_grade": fraud_grade,
         "signals": signals,
         "income_crosscheck": {
@@ -164,6 +168,9 @@ def run_fraud(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[str
                 "payslip_income": payslip_income,
                 "name_match": name_match,
                 "match_score": match_score,
+                "web_search_summary": web_output.get("summary"),
+                "web_search_confidence_applicant": web_output.get("confidence_applicant"),
+                "web_search_confidence_employer": web_output.get("confidence_employer"),
             }
         ),
         calculations={"diff_ratio": diff_ratio, "tolerance": tolerance, "name_match_low_score": low_score},

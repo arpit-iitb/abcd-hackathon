@@ -15,8 +15,10 @@ user_template: |
   - Compare bank salary vs payslip income, compute diff_ratio.
   - Use id_verification.name_match/match_score for identity consistency.
   - Combine signals into fraud_grade: good|suspicious|fraudulent.
+  - Consider web_search.output summary and confidence grades; weight low-confidence results lightly.
 
   OUTPUT_JSON_SCHEMA (AgentResultBase):
+  - output.summary: string (concise human-readable summary)
   - output.fraud_grade: "good"|"suspicious"|"fraudulent"
   - output.signals: [{signal_name, severity, evidence_fields}]
   - output.income_crosscheck: {bank_salary, payslip_income, diff_ratio}

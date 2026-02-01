@@ -19,6 +19,7 @@ user_template: |
   - If risk_assessment/fraud include status, validate status=="ok" or note in missing_data. Do not require bureau/id_verification/payslip if risk/fraud already derived.
 
   OUTPUT_JSON_SCHEMA (AgentResultBase):
+  - output.summary: string (concise human-readable summary)
   - output.decision: "approved"|"rejected"|"human_review_required"
   - output.sanctioned_amount
   - output.roi

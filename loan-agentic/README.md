@@ -31,6 +31,11 @@ python -m app.run_pipeline --config-dir .\configs --prompt-dir .\prompts --sampl
 streamlit run .\streamlit_app.py
 ```
 
+## Run Demo Dashboard
+```powershell
+streamlit run .\streamlit_demo.py
+```
+
 ## Notes
 - `.env` is ignored by git. Do not commit secrets.
 - Aadhaar + selfie images are expected as PNG/JPG files under `data/images/` (see `data/images/README.txt`). Images are converted to compressed JPEG before sending to the LLM to reduce token size.

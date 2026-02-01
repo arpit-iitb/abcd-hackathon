@@ -23,6 +23,7 @@ user_template: |
   - If OCR not enabled and only images are provided: status=insufficient_data.
 
   OUTPUT_JSON_SCHEMA (AgentResultBase):
+  - output.summary: string (concise human-readable summary)
   - output.name_match: boolean
   - output.match_score: number 0..1
   - output.face_match: boolean|null

@@ -51,6 +51,7 @@ def run_risk_assessment(payload: Dict[str, Any], config: Dict[str, Any], prompts
     bureau = payload.get("bureau", {}) if isinstance(payload, dict) else {}
     bank = payload.get("bank_statement", {}) if isinstance(payload, dict) else {}
     lead = payload.get("lead", {}) if isinstance(payload, dict) else {}
+    web_search = payload.get("web_search", {}) if isinstance(payload, dict) else {}
 
     bureau_grade = bureau.get("bureau_risk_grade")
     avg_balance = bank.get("avg_balance")
@@ -120,15 +121,21 @@ def run_risk_assessment(payload: Dict[str, Any], config: Dict[str, Any], prompts
         "final_value": risk_value,
     }
 
+    summary = f"Risk grade: {final_grade}. " + ", ".join(risk_factors[:3])
     result = AgentResultBase(
         agent_name="risk_assessment",
         status="ok",
         errors=[],
         missing_data=[],
         rationale_summary=risk_factors,
-        evidence=mask_sensitive({"bureau": bureau, "bank_statement": bank, "lead": lead}),
+        evidence=mask_sensitive({"bureau": bureau, "bank_statement": bank, "lead": lead, "web_search": web_search}),
         calculations=calculations,
         confidence=0.7,
-        output={"final_risk_grade": final_grade, "risk_factors": risk_factors, "calculations": calculations},
+        output={
+            "summary": summary,
+            "final_risk_grade": final_grade,
+            "risk_factors": risk_factors,
+            "calculations": calculations,
+        },
     )
     return result.model_dump(mode="json")

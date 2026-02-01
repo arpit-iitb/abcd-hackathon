@@ -227,7 +227,9 @@ def run_approval(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[
             "recommended_terms": {"sanctioned_amount": sanctioned_amount, "roi": roi_value},
         }
 
+    summary = f"Decision={decision}. Sanctioned={sanctioned_amount}. ROI={roi_value}."
     decision_output = {
+        "summary": summary,
         "decision": decision,
         "sanctioned_amount": sanctioned_amount,
         "roi": roi_value,
