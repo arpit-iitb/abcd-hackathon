@@ -525,9 +525,11 @@ if st.session_state.page == "landing":
             lead_results = []
             config = st.session_state.config_override
             for lead in lead_samples:
-                lead_updated, fallbacks = build_lead_with_fallback(lead, config)
+                lead_updated, fallbacks, assets = build_lead_with_fallback(lead, config)
                 result = run_lead_sourcing(lead_updated, config, {})
-                lead_results.append({"lead": lead_updated, "result": result, "fallbacks": fallbacks})
+                lead_results.append(
+                    {"lead": lead_updated, "result": result, "fallbacks": fallbacks, "assets": assets}
+                )
             st.session_state.lead_results = lead_results
             st.session_state.page = "leads"
         if hasattr(st, "rerun"):
@@ -554,8 +556,12 @@ if st.session_state.page == "leads":
             for col, item in zip(cols, row):
                 with col:
                     lead = item["lead"]
-                    photo_b64 = get_selfie_b64(lead.get("lead_id"), id_docs_samples)
-                    render_lead_card(lead, company_map.get(lead.get("lead_id"), "Unknown"), photo_b64)
+                    assets = item.get("assets") or {}
+                    photo_b64 = assets.get("selfie_base64") or get_selfie_b64(
+                        lead.get("lead_id"), id_docs_samples
+                    )
+                    company = assets.get("company") or company_map.get(lead.get("lead_id"), "Unknown")
+                    render_lead_card(lead, company, photo_b64)
                     if st.button("Select", key=f"select_{lead.get('lead_id')}"):
                         st.session_state.selected_lead_id = lead.get("lead_id")
 
@@ -569,8 +575,12 @@ if st.session_state.page == "leads":
             for col, item in zip(cols, row):
                 with col:
                     lead = item["lead"]
-                    photo_b64 = get_selfie_b64(lead.get("lead_id"), id_docs_samples)
-                    render_lead_card(lead, company_map.get(lead.get("lead_id"), "Unknown"), photo_b64)
+                    assets = item.get("assets") or {}
+                    photo_b64 = assets.get("selfie_base64") or get_selfie_b64(
+                        lead.get("lead_id"), id_docs_samples
+                    )
+                    company = assets.get("company") or company_map.get(lead.get("lead_id"), "Unknown")
+                    render_lead_card(lead, company, photo_b64)
 
     st.markdown("<div id='sales-agent'></div>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>Sales Agent</div>", unsafe_allow_html=True)
