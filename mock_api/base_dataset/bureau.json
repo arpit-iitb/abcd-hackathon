@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Jane Doe",
+    "pan": "ABCDE1234F",
+    "response": {
+      "lead_id": "L-1001",
+      "raw": {
+        "provider": "demo_bureau",
+        "report_id": "BR-001",
+        "enquiry_count_30_days": 1,
+        "repayment_history": "0, 0, 0, 0",
+        "score": 705
+      },
+      "normalized": {
+        "score": 705,
+        "delinquencies": 0
+      }
+    }
+  },
+  {
+    "name": "Rahul Sharma",
+    "pan": "PQRSX9876K",
+    "response": {
+      "lead_id": "L-1002",
+      "raw": {
+        "provider": "demo_bureau",
+        "report_id": "BR-002",
+        "enquiry_count_30_days": 0,
+        "repayment_history": "0, 0, 0, 0",
+        "score": 680
+      },
+      "normalized": {
+        "score": 680,
+        "delinquencies": 0
+      }
+    }
+  }
+]
