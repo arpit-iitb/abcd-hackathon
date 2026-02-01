@@ -68,6 +68,26 @@ def _merge_lead(local_lead: Dict[str, Any], api_lead: Dict[str, Any]) -> Tuple[D
     return lead, account_number, pan_no
 
 
+def build_lead_with_fallback(lead: Dict[str, Any], config: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
+    fallbacks: List[str] = []
+    if not isinstance(lead, dict):
+        return lead, ["Invalid lead payload; used local lead JSON."]
+
+    enabled, endpoints, timeout_sec = _api_config(config)
+    if enabled and lead.get("lead_id"):
+        try:
+            api_lead = _post_json(
+                endpoints["lead_sourcing"],
+                {"lead_id": lead.get("lead_id")},
+                timeout_sec=timeout_sec,
+            )
+            merged, _, _ = _merge_lead(lead, api_lead)
+            return merged, fallbacks
+        except Exception as exc:
+            fallbacks.append(f"Lead API failed ({exc}); used local lead JSON.")
+    return lead, fallbacks
+
+
 def build_application_payload_with_fallback(
     sample_dir: str,
     sample_id: Optional[str],

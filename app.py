@@ -18,7 +18,7 @@ from app.prompt_loader import load_prompts
 from app.reporting import compute_case_id, write_run_artifacts
 from app.state import LoanApplicationInput
 from app.utils.image_utils import load_image_base64
-from app.utils.data_fetch import build_application_payload_with_fallback
+from app.utils.data_fetch import build_application_payload_with_fallback, build_lead_with_fallback
 
 
 st.set_page_config(page_title="ABCD Demo", layout="wide")
@@ -106,6 +106,11 @@ def inject_theme() -> None:
   }
   .stAlert {
     color: #0d223d;
+    background: #fff4cc;
+    border: 1px solid #f1d48a;
+  }
+  [data-testid="stAlert"] p, [data-testid="stAlert"] span {
+    color: #0d223d !important;
   }
   .section-title, h3, h4, h5, h6 {
     color: #0d223d;
@@ -516,13 +521,13 @@ if st.session_state.page == "landing":
     )
     st.write("")
     if st.button("Run Lead Sourcing", use_container_width=True):
-        with st.spinner("Loading the most optimal leads for you..."):
-            time.sleep(0.8)
+        with st.spinner("Fetching lead data from API..."):
             lead_results = []
             config = st.session_state.config_override
             for lead in lead_samples:
-                result = run_lead_sourcing(lead, config, {})
-                lead_results.append({"lead": lead, "result": result})
+                lead_updated, fallbacks = build_lead_with_fallback(lead, config)
+                result = run_lead_sourcing(lead_updated, config, {})
+                lead_results.append({"lead": lead_updated, "result": result, "fallbacks": fallbacks})
             st.session_state.lead_results = lead_results
             st.session_state.page = "leads"
         if hasattr(st, "rerun"):
@@ -579,7 +584,8 @@ if st.session_state.page == "leads":
             thread_id = selected_lead_id
             config = st.session_state.config_override
             prompts = load_prompts(prompt_dir)
-            application_payload, fallbacks = build_application_payload(selected_lead_id, sample_dir, config)
+            with st.spinner("Fetching applicant data..."):
+                application_payload, fallbacks = build_application_payload(selected_lead_id, sample_dir, config)
             application = LoanApplicationInput.model_validate(application_payload)
             case_id = compute_case_id(application_payload)
             logger = setup_logger(run_id=run_id, thread_id=thread_id, case_id=case_id)
