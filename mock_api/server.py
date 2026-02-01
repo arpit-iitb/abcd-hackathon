@@ -10,13 +10,17 @@ from pydantic import BaseModel, Field
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "base_dataset"
 
-app = FastAPI(title="Mock Bureau API")
+app = FastAPI(title="Mock Credit API")
 app.mount("/images", StaticFiles(directory=BASE_DIR / "images"), name="images")
 
 
 class BureauRequest(BaseModel):
     name: str = Field(..., min_length=1)
     pan: str = Field(..., min_length=1)
+
+
+class BankStatementRequest(BaseModel):
+    account_number: str = Field(..., min_length=1)
 
 
 @app.get("/health")
@@ -40,3 +44,19 @@ def bureau(payload: BureauRequest) -> dict:
             return item.get("response", {})
 
     raise HTTPException(status_code=404, detail="no matching bureau record")
+
+
+@app.post("/bank-statement")
+def bank_statement(payload: BankStatementRequest) -> dict:
+    data_path = DATA_DIR / "bank_statement.json"
+    try:
+        records = json.loads(data_path.read_text())
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=500, detail="base dataset missing") from exc
+
+    key_account = payload.account_number.strip().lower()
+    for item in records:
+        if item.get("account_number", "").strip().lower() == key_account:
+            return item.get("response", {})
+
+    raise HTTPException(status_code=404, detail="no matching bank statement record")
