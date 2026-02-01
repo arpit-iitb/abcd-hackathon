@@ -1,4 +1,5 @@
 import argparse
+from typing import Any, Dict
 from pathlib import Path
 from uuid import uuid4
 
@@ -14,7 +15,7 @@ from app.state import LoanApplicationInput
 from app.utils.masking import mask_sensitive
 from app.checkpoint_utils import get_sqlite_checkpointer
 from app.reporting import compute_case_id, write_run_artifacts
-from app.utils.image_utils import load_image_base64
+from app.utils.data_fetch import build_application_payload_with_fallback
 
 
 def parse_error(exc: ValidationError, run_id: str):
@@ -25,50 +26,8 @@ def parse_error(exc: ValidationError, run_id: str):
     }
 
 
-def _build_application_payload(sample_dir: str, sample_id: str = None):
-    lead_payload = load_json(f"{sample_dir}/lead_samples.json")
-    bureau_payload = load_json(f"{sample_dir}/bureau_samples.json")
-    bank_payload = load_json(f"{sample_dir}/bank_statement_samples.json")
-    id_docs_payload = load_json(f"{sample_dir}/id_docs_samples.json")
-    payslip_payload = load_json(f"{sample_dir}/payslip_samples.json")
-
-    def select_sample(payload):
-        if not isinstance(payload, list):
-            return payload
-        if sample_id is None:
-            return payload[0]
-        for item in payload:
-            if item.get("lead_id") == sample_id:
-                return item
-        return payload[0]
-
-    lead_sample = select_sample(lead_payload)
-    bureau_sample = select_sample(bureau_payload)
-    bank_sample = select_sample(bank_payload)
-    id_docs_sample = select_sample(id_docs_payload)
-    payslip_sample = select_sample(payslip_payload)
-
-    aadhaar_path = id_docs_sample.get("aadhaar_image_file") or (id_docs_sample.get("aadhaar_doc") or {}).get("image_path")
-    selfie_path = id_docs_sample.get("selfie_image_file") or (id_docs_sample.get("selfie_doc") or {}).get("image_path")
-    aadhaar_base64 = load_image_base64(aadhaar_path)
-    selfie_base64 = load_image_base64(selfie_path)
-    aadhaar_doc = {"image_base64": aadhaar_base64} if aadhaar_base64 else id_docs_sample.get("aadhaar_doc")
-    selfie_doc = {"image_base64": selfie_base64} if selfie_base64 else id_docs_sample.get("selfie_doc")
-
-    return {
-        "lead": lead_sample,
-        "bureau_report": {
-            "raw": bureau_sample.get("raw", bureau_sample),
-            "normalized": bureau_sample.get("normalized"),
-        },
-        "bank_statement": bank_sample.get("transactions", bank_sample),
-        "documents": {
-            "aadhaar_doc": aadhaar_doc,
-            "pan_doc": id_docs_sample.get("pan_doc"),
-            "selfie_doc": selfie_doc,
-            "payslip_doc": payslip_sample.get("payslip_doc") or {"parsed_json": payslip_sample},
-        },
-    }
+def _build_application_payload(sample_dir: str, sample_id: str | None, config: Dict[str, Any]):
+    return build_application_payload_with_fallback(sample_dir, sample_id, config)
 
 
 def main() -> int:
@@ -89,7 +48,7 @@ def main() -> int:
     try:
         config = load_config_dir(args.config_dir)
         prompts = load_prompts(args.prompt_dir)
-        application_payload = _build_application_payload(args.sample_dir, args.sample_id)
+        application_payload, fallbacks = _build_application_payload(args.sample_dir, args.sample_id, config)
     except Exception as exc:
         print(dump_json({"status": "error", "run_id": run_id, "message": f"load_error: {exc}"}))
         return 1
@@ -134,6 +93,7 @@ def main() -> int:
         "prompts": prompts,
         "results": {},
         "traces": {},
+        "run_meta": {"fallbacks": fallbacks or []},
     }
 
     log_event(logger, "pipeline start", run_id, thread_id, "pipeline_start", case_id=case_id)

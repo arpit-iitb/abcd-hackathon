@@ -35,6 +35,7 @@ class LoanGraphState(TypedDict, total=False):
     prompts: Dict[str, Any]
     results: Dict[str, Any]
     traces: Dict[str, Any]
+    run_meta: Dict[str, Any]
     decision: Dict[str, Any]
     review_packet: Dict[str, Any]
     sales_orchestrator: Dict[str, Any]

@@ -1,0 +1,6 @@
+enabled: true
+timeout_sec: 8
+endpoints:
+  lead_sourcing: "https://asterisk0007.pythonanywhere.com/lead-sourcing"
+  bureau: "https://asterisk0007.pythonanywhere.com/bureau"
+  bank_statement: "https://asterisk0007.pythonanywhere.com/bank-statement"

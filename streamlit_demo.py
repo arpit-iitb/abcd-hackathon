@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from uuid import uuid4
 
 import streamlit as st
@@ -18,6 +18,7 @@ from app.prompt_loader import load_prompts
 from app.reporting import compute_case_id, write_run_artifacts
 from app.state import LoanApplicationInput
 from app.utils.image_utils import load_image_base64
+from app.utils.data_fetch import build_application_payload_with_fallback
 
 
 st.set_page_config(page_title="ABCD Demo", layout="wide")
@@ -272,6 +273,14 @@ def inject_theme() -> None:
   .flow-connector.active::after {
     border-left-color: #22c55e;
   }
+  .selected-lead {
+    background: #d1f7e3;
+    color: #0f5132;
+    border: 1px solid #a7e3c8;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
   @keyframes flowFill {
     0% { width: 0; }
     50% { width: 100%; }
@@ -383,50 +392,9 @@ def render_lead_card(lead: Dict[str, Any], company: str, image_b64: str) -> None
     )
 
 
-def build_application_payload(sample_id: str, sample_dir: str, lead_samples: List[Dict[str, Any]]) -> Dict[str, Any]:
-    def pick_sample(samples: List[Dict[str, Any]]) -> Dict[str, Any]:
-        for sample in samples:
-            if sample.get("lead_id") == sample_id:
-                return sample
-        return samples[0]
-
-    bureau_samples = load_samples(f"{sample_dir}/bureau_samples.json")
-    bank_samples = load_samples(f"{sample_dir}/bank_statement_samples.json")
-    id_docs_samples = load_samples(f"{sample_dir}/id_docs_samples.json")
-    payslip_samples = load_samples(f"{sample_dir}/payslip_samples.json")
-
-    lead_sample = pick_sample(lead_samples)
-    bureau_sample = pick_sample(bureau_samples)
-    bank_sample = pick_sample(bank_samples)
-    id_docs_sample = pick_sample(id_docs_samples)
-    payslip_sample = pick_sample(payslip_samples)
-
-    aadhaar_path = id_docs_sample.get("aadhaar_image_file") or (id_docs_sample.get("aadhaar_doc") or {}).get("image_path")
-    selfie_path = id_docs_sample.get("selfie_image_file") or (id_docs_sample.get("selfie_doc") or {}).get("image_path")
-    aadhaar_b64 = image_b64_from_path(aadhaar_path)
-    selfie_b64 = image_b64_from_path(selfie_path)
-    if not aadhaar_b64:
-        raise ValueError(f"Missing Aadhaar image file for {sample_id}")
-    if not selfie_b64:
-        raise ValueError(f"Missing selfie image file for {sample_id}")
-
-    aadhaar_doc = {"image_base64": aadhaar_b64}
-    selfie_doc = {"image_base64": selfie_b64}
-
-    return {
-        "lead": lead_sample,
-        "bureau_report": {
-            "raw": bureau_sample.get("raw", bureau_sample),
-            "normalized": bureau_sample.get("normalized"),
-        },
-        "bank_statement": bank_sample.get("transactions", bank_sample),
-        "documents": {
-            "aadhaar_doc": aadhaar_doc,
-            "pan_doc": id_docs_sample.get("pan_doc"),
-            "selfie_doc": selfie_doc,
-            "payslip_doc": payslip_sample.get("payslip_doc") or {"parsed_json": payslip_sample},
-        },
-    }
+def build_application_payload(sample_id: str, sample_dir: str, config: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
+    payload, fallbacks = build_application_payload_with_fallback(sample_dir, sample_id, config)
+    return payload, fallbacks
 
 
 def summarize_status(status: str) -> str:
@@ -605,13 +573,13 @@ if st.session_state.page == "leads":
     if not selected_lead_id:
         st.info("Select a lead to run the Sales Agent.")
     else:
-        st.success(f"Selected lead: {selected_lead_id}")
+        st.markdown(f"<div class='selected-lead'>Selected lead: {selected_lead_id}</div>", unsafe_allow_html=True)
         if st.button("Run Sales Agent", key="run_sales_agent"):
             run_id = str(uuid4())
             thread_id = selected_lead_id
             config = st.session_state.config_override
             prompts = load_prompts(prompt_dir)
-            application_payload = build_application_payload(selected_lead_id, sample_dir, lead_samples)
+            application_payload, fallbacks = build_application_payload(selected_lead_id, sample_dir, config)
             application = LoanApplicationInput.model_validate(application_payload)
             case_id = compute_case_id(application_payload)
             logger = setup_logger(run_id=run_id, thread_id=thread_id, case_id=case_id)
@@ -630,6 +598,7 @@ if st.session_state.page == "leads":
                 "prompts": prompts,
                 "results": {},
                 "traces": {},
+                "run_meta": {"fallbacks": fallbacks or []},
             }
 
             run_cols = st.columns([2, 1])
@@ -712,6 +681,9 @@ if st.session_state.page == "leads":
             with tabs[2]:
                 st.markdown("<div id='agent-trace'></div>", unsafe_allow_html=True)
                 st.markdown("<div class='section-title'>Detailed Traces</div>", unsafe_allow_html=True)
+                fallbacks = final_state.get("run_meta", {}).get("fallbacks", []) if isinstance(final_state, dict) else []
+                if fallbacks:
+                    st.warning("Fallbacks used:\n" + "\n".join(f"- {item}" for item in fallbacks))
                 traces = final_state.get("traces", {}) if isinstance(final_state, dict) else {}
                 if not traces:
                     st.info("No traces recorded yet.")
