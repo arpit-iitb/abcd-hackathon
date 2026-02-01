@@ -109,6 +109,20 @@ def inject_theme() -> None:
   .section-title, h3, h4, h5, h6 {
     color: #0d223d;
   }
+  /* Tabs header visibility */
+  [data-testid="stTabs"] button {
+    color: #0d223d !important;
+  }
+  [data-testid="stTabs"] [data-baseweb="tab"] span {
+    color: #0d223d !important;
+  }
+  [data-testid="stTabs"] [aria-selected="true"] {
+    color: #0d223d !important;
+    font-weight: 700;
+  }
+  [data-testid="stTabs"] [data-baseweb="tab-list"] {
+    background: transparent;
+  }
   .status-pill {
     color: #0d223d;
   }
@@ -510,6 +524,7 @@ st.markdown(
     <a href="#lead-sourcing">Lead Sourcing</a>
     <a href="#sales-agent">Sales Agent</a>
     <a href="#agent-outputs">Agent Outputs</a>
+    <a href="#agent-trace">Detailed Traces</a>
     <a href="#final-decision">Final Decision</a>
   </div>
 </div>
@@ -631,49 +646,84 @@ if st.session_state.page == "leads":
             sanctioned = approval.get("output", {}).get("sanctioned_amount")
             roi = approval.get("output", {}).get("roi")
 
-            st.markdown("<div id='final-decision'></div>", unsafe_allow_html=True)
-            st.markdown("<div class='section-title'>Decision</div>", unsafe_allow_html=True)
-            metric_cols = st.columns(3)
-            metric_cols[0].markdown(f"<div class='metric-card'><strong>Decision</strong><br>{decision}</div>", unsafe_allow_html=True)
-            metric_cols[1].markdown(f"<div class='metric-card'><strong>Sanctioned</strong><br>{sanctioned}</div>", unsafe_allow_html=True)
-            metric_cols[2].markdown(f"<div class='metric-card'><strong>ROI</strong><br>{roi}</div>", unsafe_allow_html=True)
+            tabs = st.tabs(["Final Decision", "Agent Outputs", "Detailed Traces"])
+            with tabs[0]:
+                st.markdown("<div id='final-decision'></div>", unsafe_allow_html=True)
+                st.markdown("<div class='section-title'>Decision</div>", unsafe_allow_html=True)
+                metric_cols = st.columns(3)
+                metric_cols[0].markdown(f"<div class='metric-card'><strong>Decision</strong><br>{decision}</div>", unsafe_allow_html=True)
+                metric_cols[1].markdown(f"<div class='metric-card'><strong>Sanctioned</strong><br>{sanctioned}</div>", unsafe_allow_html=True)
+                metric_cols[2].markdown(f"<div class='metric-card'><strong>ROI</strong><br>{roi}</div>", unsafe_allow_html=True)
 
-            st.markdown("<div id='agent-outputs'></div>", unsafe_allow_html=True)
-            st.markdown("<div class='section-title'>Agent Outputs</div>", unsafe_allow_html=True)
-            results = final_state.get("results", {}) if isinstance(final_state, dict) else {}
-            web_search_output = (results.get("web_search") or {}).get("output", {}) if isinstance(results, dict) else {}
-            web_summary = web_search_output.get("summary")
-            if web_summary:
-                st.markdown(
-                    f"<div class='summary-card summary-ok'><strong>Web Search Summary</strong><br>{web_summary}</div>",
-                    unsafe_allow_html=True,
-                )
+            with tabs[1]:
+                st.markdown("<div id='agent-outputs'></div>", unsafe_allow_html=True)
+                st.markdown("<div class='section-title'>Agent Outputs</div>", unsafe_allow_html=True)
+                results = final_state.get("results", {}) if isinstance(final_state, dict) else {}
+                web_search_output = (results.get("web_search") or {}).get("output", {}) if isinstance(results, dict) else {}
+                web_summary = web_search_output.get("summary")
+                if web_summary:
+                    st.markdown(
+                        f"<div class='summary-card summary-ok'><strong>Web Search Summary</strong><br>{web_summary}</div>",
+                        unsafe_allow_html=True,
+                    )
 
-            traces = final_state.get("traces", {}) if isinstance(final_state, dict) else {}
-            keep_agents = {"fraud", "risk_assessment", "id_verification", "approval"}
-            filtered = {k: v for k, v in traces.items() if k in keep_agents}
-            if not filtered:
-                st.info("No agent outputs recorded for this run.")
-            else:
-                for agent_name, trace in filtered.items():
-                    output_snapshot = trace.get("output_snapshot", {}) if isinstance(trace, dict) else {}
-                    output_only = output_snapshot.get("output", {})
-                    summary = output_only.get("summary")
-                    fraud_grade = output_only.get("fraud_grade")
-                    decision = output_only.get("decision")
-                    final_risk = output_only.get("final_risk_grade")
-                    card_class = "summary-ok"
-                    if decision == "human_review_required":
-                        card_class = "summary-warn"
-                    if fraud_grade == "suspicious":
-                        card_class = "summary-danger"
-                    if fraud_grade == "fraudulent":
-                        card_class = "summary-danger"
-                    if final_risk == "high":
-                        card_class = "summary-risk"
-                    with st.expander(agent_name.replace("_", " ").title()):
-                        if summary:
-                            st.markdown(
-                                f"<div class='summary-card {card_class}'><strong>Summary</strong><br>{summary}</div>",
-                                unsafe_allow_html=True,
-                            )
+                traces = final_state.get("traces", {}) if isinstance(final_state, dict) else {}
+                keep_agents = {"fraud", "risk_assessment", "id_verification", "approval"}
+                filtered = {k: v for k, v in traces.items() if k in keep_agents}
+                if not filtered:
+                    st.info("No agent outputs recorded for this run.")
+                else:
+                    for agent_name, trace in filtered.items():
+                        output_snapshot = trace.get("output_snapshot", {}) if isinstance(trace, dict) else {}
+                        output_only = output_snapshot.get("output", {})
+                        summary = output_only.get("summary")
+                        fraud_grade = output_only.get("fraud_grade")
+                        decision = output_only.get("decision")
+                        final_risk = output_only.get("final_risk_grade")
+                        card_class = "summary-ok"
+                        if decision == "human_review_required":
+                            card_class = "summary-warn"
+                        if fraud_grade == "suspicious":
+                            card_class = "summary-danger"
+                        if fraud_grade == "fraudulent":
+                            card_class = "summary-danger"
+                        if final_risk == "high":
+                            card_class = "summary-risk"
+                        with st.expander(agent_name.replace("_", " ").title()):
+                            if summary:
+                                st.markdown(
+                                    f"<div class='summary-card {card_class}'><strong>Summary</strong><br>{summary}</div>",
+                                    unsafe_allow_html=True,
+                                )
+
+            with tabs[2]:
+                st.markdown("<div id='agent-trace'></div>", unsafe_allow_html=True)
+                st.markdown("<div class='section-title'>Detailed Traces</div>", unsafe_allow_html=True)
+                traces = final_state.get("traces", {}) if isinstance(final_state, dict) else {}
+                if not traces:
+                    st.info("No traces recorded yet.")
+                else:
+                    for agent_name, trace in traces.items():
+                        with st.expander(agent_name.replace("_", " ").title()):
+                            output_snapshot = trace.get("output_snapshot", {}) if isinstance(trace, dict) else {}
+                            st.write(f"Status: {output_snapshot.get('status')}")
+                            st.write(f"Duration (ms): {trace.get('duration_ms')}")
+                            st.subheader("Input Snapshot")
+                            st.json(trace.get("input_snapshot", {}))
+                            st.subheader("Output")
+                            st.json(output_snapshot)
+                            st.subheader("Rationale Summary")
+                            for item in output_snapshot.get("rationale_summary", []):
+                                st.markdown(f"- {item}")
+                            st.subheader("Evidence")
+                            st.json(output_snapshot.get("evidence", {}))
+                            st.subheader("Calculations")
+                            st.json(output_snapshot.get("calculations", {}))
+                            st.subheader("Missing Data")
+                            st.json(output_snapshot.get("missing_data", []))
+                            st.subheader("Confidence")
+                            st.write(output_snapshot.get("confidence"))
+                            st.subheader("Prompt Meta")
+                            st.json(trace.get("prompt_meta", {}))
+                            st.subheader("Tool Calls")
+                            st.json(trace.get("tool_calls", []))

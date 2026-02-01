@@ -1,4 +1,4 @@
-enabled: false
+enabled: true
 provider: duckduckgo
 max_results: 5
 max_queries: 3

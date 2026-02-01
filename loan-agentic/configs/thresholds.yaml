@@ -6,7 +6,7 @@ bureau:
   dpd_count_bad_medium: 2
   dpd_count_bad_high: 4
 bank:
-  salary_keyword_list: ["salary", "payroll", "neft salary"]
+  salary_keyword_list: ["salary", "payroll", "neft salary","bulk"]
   suspicious_spend_monthly_ratio_medium: 0.15
   suspicious_spend_monthly_ratio_high: 0.30
   min_txns_for_confidence: 15

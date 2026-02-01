@@ -7,6 +7,7 @@ system: |
   - If results are empty or unrelated, say so explicitly.
   - Provide confidence grades for applicant and employer (high|medium|low).
   - Do NOT output chain-of-thought; provide rationale_summary bullets only.
+  - Output MUST be valid JSON matching AgentResultBase with all required top-level keys.
 
 user_template: |
   INPUT_JSON: {{input_json}}
@@ -17,10 +18,23 @@ user_template: |
   - Provide confidence_applicant and confidence_employer (high|medium|low) based on match certainty.
   - If applicant data is inconclusive but employer is found, say so, and vice versa.
   - Provide a single concise summary string suitable for the UI.
+  - If search_results contain provider errors or empty results, set status="insufficient_data" OR "ok" with low confidence and explain in rationale_summary.
 
-  OUTPUT_JSON_SCHEMA (AgentResultBase):
-  - output.summary: string (concise human-readable summary)
-  - output.applicant_profile: string
-  - output.employer_profile: string
-  - output.confidence_applicant: "high"|"medium"|"low"
-  - output.confidence_employer: "high"|"medium"|"low"
+  OUTPUT_JSON_SCHEMA (FULL AgentResultBase):
+  {
+    "agent_name": "web_search",
+    "status": "ok|insufficient_data|error",
+    "errors": [{"code": "", "message": "", "where": "", "severity": "warning|fatal"}],
+    "missing_data": [],
+    "rationale_summary": [],
+    "evidence": {},
+    "calculations": {},
+    "confidence": 0.0,
+    "output": {
+      "summary": "",
+      "applicant_profile": "",
+      "employer_profile": "",
+      "confidence_applicant": "high|medium|low",
+      "confidence_employer": "high|medium|low"
+    }
+  }

@@ -26,5 +26,5 @@ approval:
   model: gpt-5.2
   temperature: 0.05
 web_search:
-  model: gpt-4o-mini
-  temperature: 0.0
+  model: gpt-5.2
+  temperature: 0.05
