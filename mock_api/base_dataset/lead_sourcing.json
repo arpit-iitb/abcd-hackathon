@@ -1,0 +1,32 @@
+[
+  {
+    "lead_id": "L-1001",
+    "response": {
+      "lead_id": "L-1001",
+      "applicant": {
+        "aadhar_no": "1234-5678-9012",
+        "pan_no": "ABCDE1234F",
+        "account_number": "1234567890",
+        "name": "Jane Doe",
+        "city": "Bengaluru",
+        "employer": "Acme Corp",
+        "loan_requested_amount": 250000
+      }
+    }
+  },
+  {
+    "lead_id": "L-2002",
+    "response": {
+      "lead_id": "L-2002",
+      "applicant": {
+        "aadhar_no": "9876-5432-1098",
+        "pan_no": "PQRSX9876K",
+        "account_number": "9876543210",
+        "name": "Rahul Sharma",
+        "city": "Mumbai",
+        "employer": "Nimbus Labs",
+        "loan_requested_amount": 500000
+      }
+    }
+  }
+]

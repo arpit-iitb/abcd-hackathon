@@ -23,6 +23,10 @@ class BankStatementRequest(BaseModel):
     account_number: str = Field(..., min_length=1)
 
 
+class LeadSourcingRequest(BaseModel):
+    lead_id: str = Field(..., min_length=1)
+
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
@@ -60,3 +64,19 @@ def bank_statement(payload: BankStatementRequest) -> dict:
             return item.get("response", {})
 
     raise HTTPException(status_code=404, detail="no matching bank statement record")
+
+
+@app.post("/lead-sourcing")
+def lead_sourcing(payload: LeadSourcingRequest) -> dict:
+    data_path = DATA_DIR / "lead_sourcing.json"
+    try:
+        records = json.loads(data_path.read_text())
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=500, detail="base dataset missing") from exc
+
+    key_lead = payload.lead_id.strip().lower()
+    for item in records:
+        if item.get("lead_id", "").strip().lower() == key_lead:
+            return item.get("response", {})
+
+    raise HTTPException(status_code=404, detail="no matching lead record")
