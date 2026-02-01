@@ -1,46 +1,40 @@
-# Agentic Loan Journey (LangGraph)
+# Loan Agentic Hello Pipeline
 
-Agentic loan journey system: lead sourcing → sales orchestration → fraud/risk/approval.
+Minimal repo scaffold with a placeholder pipeline that loads config and prompts, reads a sample from `data/`, and prints a stub JSON output.
 
-## Features
-- LangGraph state graph with checkpointing for per-node state inspection
-- Strict JSON IO per agent with Pydantic validation
-- Structured JSON logs with run_id/thread_id
-- Masking for Aadhaar/PAN in logs and evidence
-- Explainability outputs without chain-of-thought
-- Configurable thresholds and prompt templates (YAML)
-- Streamlit demo UI
-
-## Repo layout
-```
-app/                  Core pipeline + agents
-configs/              Thresholds and required fields
-prompts/              Agent prompts (YAML)
-data/                 Dummy JSON samples
-streamlit_app.py      Streamlit demo UI
-```
-
-## Run the CLI
+## Setup
 ```powershell
+python --version  # ensure Python 3.10+
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python -m app.run_pipeline --input .\data\sample_application.json
 ```
 
-## Run the Streamlit demo
+## Configure OpenAI
+Copy the env template and add your key:
+```
+copy .env.example .env
+```
+Edit `.env` and set:
+```
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-5.2
+OPENAI_TEMPERATURE=0.1
+```
+
+## Run CLI
 ```powershell
-streamlit run .\streamlit_app.py
+python -m app.run_pipeline --config-dir .\configs --prompt-dir .\prompts --sample-dir .\data
 ```
 
-## Inspect checkpoints
-The pipeline uses a SQLite checkpoint store at `data/checkpoints.db` (configurable). Each node’s state is persisted for debugging.
-
-## Configuration
-- `configs/thresholds.yaml` controls risk thresholds, weights, and required fields
-- `prompts/agents.yaml` stores prompt templates used by each agent
-
-## Tests
+## Run Demo Dashboard
 ```powershell
-pytest -q
+streamlit run .\streamlit_demo.py
 ```
+
+## Notes
+- `.env` is ignored by git. Do not commit secrets.
+- Aadhaar + selfie images are expected as PNG/JPG files under `data/images/`. Images are converted to compressed JPEG before sending to the LLM to reduce token size.
+- Per-agent LLM model/temperature can be set in `configs/models.yaml`.
+- LLM usage per agent is controlled in `configs/llm.yaml`. Set an agent to `false` to use rule-based fallbacks (useful for tests/offline runs).
+- This is a hello pipeline stub; extend `app/graph.py` and `agents/` for full orchestration.
