@@ -1,29 +1,48 @@
-# Thresholds and weights for loan journey decisions
-risk:
-  min_bureau_score: 650
-  max_bureau_score: 900
-  max_dti: 0.45
-  min_salary: 25000
-  max_foir: 0.50
-  annual_interest_rate: 0.18
-  min_employment_tenure_months: 12
-  max_employment_tenure_months: 120
-  max_bank_balance: 100000
+bureau:
+  enquiry_desperation_window_days: 30
+  max_enquiries_low_risk: 2
+  max_enquiries_medium_risk: 5
+  dpd_bad_threshold: 30
+  dpd_count_bad_medium: 2
+  dpd_count_bad_high: 4
+bank:
+  salary_keyword_list: ["salary", "payroll", "neft salary","bulk"]
+  suspicious_spend_monthly_ratio_medium: 0.15
+  suspicious_spend_monthly_ratio_high: 0.30
+  min_txns_for_confidence: 15
+  request_to_balance_multiplier_low: 3.0
+  request_to_balance_multiplier_medium: 5.0
+  request_to_balance_multiplier_high: 10.0
 fraud:
-  max_name_mismatch: 0.2
-  max_address_mismatch: 0.3
-  max_fraud_score: 0.3
+  income_tolerance_ratio: 0.20
+  web_search_enabled: false
+  name_match_low_score: 0.5
+id:
+  name_match_min_score: 0.8
+  face_match_min_score: 0.75
+  face_match_uncertain_score: 0.6
+  face_match_enabled: true
+  ocr_enabled: true
+payslip:
+  ocr_enabled: false
 approval:
-  min_approval_score: 0.70
-  max_risk_score: 0.35
-weights:
-  bureau_score: 0.5
-  income_stability: 0.2
-  bank_balance: 0.2
-  employment_tenure: 0.1
-required_fields:
-  lead: [first_name, last_name, phone, email, requested_amount, tenure_months]
-  id: [aadhaar, pan, full_name]
-  bureau: [score, delinquencies]
-  bank: [avg_monthly_balance, monthly_income, monthly_obligations]
-  payslip: [net_salary, employer_name, employment_tenure_months]
+  human_review_confidence_threshold: 0.75
+  human_review_if_fraud_suspicious: true
+  human_review_if_missing_critical_fields: true
+  critical_fields:
+    - "lead.requested_amount"
+    - "bank_statement.avg_balance"
+    - "risk_assessment.final_risk_grade"
+    - "fraud.fraud_grade"
+risk:
+  request_to_balance_multiplier_low: 3.0
+  request_to_balance_multiplier_medium: 5.0
+  request_to_balance_multiplier_high: 10.0
+  adjustment_by_suspicious_grade:
+    low: 0
+    medium: 0
+    high: 1
+  adjustment_by_request_to_balance:
+    low: 0
+    medium: 1
+    high: 2
