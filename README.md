@@ -1,6 +1,6 @@
 # ABCD Hackathon — Loan Application Multi-Agent Workflow
 
-A **multi-agent workflow** that simulates an end-to-end loan underwriting “hello pipeline” using a **LangGraph state machine** + specialized agents. The system turns messy application inputs into **structured, auditable decisions**: `approve / reject / human_review_required`, with masked logging and checkpointed traces.
+A **multi-agent workflow** that simulates an end-to-end loan underwriting for personal loan using a **LangGraph state machine** + specialized agents. The system turns messy application inputs into **structured, auditable decisions**: `approve / reject / human_review_required`, with masked logging and checkpointed traces.
 
 ## Why Multi-Agent (Track Fit)
 Track: **Multi-Agent Systems & Workflows** — systems where multiple agents collaborate to solve real-world problems
