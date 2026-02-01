@@ -33,6 +33,7 @@ REQUIRED_KEYS = {
         "fraud.name_match_low_score",
         "id.name_match_min_score",
         "id.face_match_min_score",
+        "id.face_match_uncertain_score",
         "id.face_match_enabled",
         "id.ocr_enabled",
         "approval.human_review_confidence_threshold",
@@ -52,7 +53,7 @@ REQUIRED_KEYS = {
     "suspicious_keywords": ["keywords"],
     "roi": ["roi_by_risk.low", "roi_by_risk.medium", "roi_by_risk.high"],
     "models": ["default.model", "default.temperature"],
-    "web_search": ["enabled", "provider"],
+    "web_search": ["enabled"],
 }
 
 

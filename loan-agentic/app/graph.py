@@ -20,7 +20,6 @@ from agents.id_verification import run_id_verification
 from agents.lead_sourcing import run_lead_sourcing
 from agents.payslip import run_payslip
 from agents.risk_assessment import run_risk_assessment
-from agents.web_search import run_web_search_agent
 from app.logging_setup import log_event
 from app.llm_runner import resolve_model_config
 from app.utils.masking import mask_sensitive
@@ -249,7 +248,7 @@ def fraud_node(state: Dict[str, Any]) -> Dict[str, Any]:
         "payslip": state.get("results", {}).get("payslip", {}),
         "id_verification": state.get("results", {}).get("id_verification", {}),
         "bureau": state.get("results", {}).get("bureau", {}),
-        "web_search": state.get("results", {}).get("web_search", {}),
+        "lead": state.get("input", {}).get("lead", {}),
     }
 
     def _runner(_, config, __):
@@ -293,11 +292,12 @@ def risk_assessment_node(state: Dict[str, Any]) -> Dict[str, Any]:
     bank_payload = dict(bank_output)
     bank_payload["request_to_balance_multiplier"] = request_to_balance_multiplier
 
+    fraud_output = state.get("results", {}).get("fraud", {}).get("output", {}) or {}
     payload = {
         "bureau": state.get("results", {}).get("bureau", {}).get("output", {}),
         "bank_statement": bank_payload,
         "lead": lead_input,
-        "web_search": state.get("results", {}).get("web_search", {}),
+        "web_search": fraud_output.get("web_search", {}),
     }
 
     def _runner(_, config, __):
@@ -322,46 +322,6 @@ def risk_assessment_node(state: Dict[str, Any]) -> Dict[str, Any]:
     return state
 
 
-def web_search_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    state = _ensure_results(state)
-    run_id = state["run_id"]
-    thread_id = state["thread_id"]
-    case_id = state.get("case_id", "")
-    logger = _get_logger()
-
-    _log_node_start(logger, run_id, thread_id, case_id, "web_search", {})
-    employer_name = ""
-    payslip_output = state.get("results", {}).get("payslip", {}).get("output", {})
-    if isinstance(payslip_output, dict):
-        employer_name = payslip_output.get("employer") or ""
-
-    payload = {
-        "lead": state.get("input", {}).get("lead", {}),
-        "employer": employer_name,
-    }
-
-    def _runner(_, config, __):
-        return run_web_search_agent(payload, config, state.get("prompts", {}))
-
-    result = run_agent_with_trace(
-        "web_search",
-        _runner,
-        state,
-        state.get("config", {}),
-        state.get("prompts", {}),
-        input_snapshot=payload,
-        prompt_meta=_prompt_meta(state, "web_search.yaml"),
-        logger=logger,
-        case_id=case_id,
-    )
-    state["results"]["web_search"] = result
-    _log_node_end(logger, run_id, thread_id, case_id, "web_search", {"status": result.get("status")})
-
-    state["sales_orchestrator"]["steps"].append("web_search")
-    state["sales_orchestrator"]["timings"]["web_search"] = _timestamp()
-    return state
-
-
 def approval_node(state: Dict[str, Any]) -> Dict[str, Any]:
     state = _ensure_results(state)
     run_id = state["run_id"]
@@ -379,7 +339,7 @@ def approval_node(state: Dict[str, Any]) -> Dict[str, Any]:
         "bureau": state.get("results", {}).get("bureau", {}),
         "id_verification": state.get("results", {}).get("id_verification", {}),
         "payslip": state.get("results", {}).get("payslip", {}),
-        "web_search": state.get("results", {}).get("web_search", {}),
+        "web_search": (state.get("results", {}).get("fraud", {}).get("output", {}) or {}).get("web_search", {}),
     }
     def _runner(_, config, __):
         return run_approval(payload, config, state.get("prompts", {}))
@@ -476,7 +436,6 @@ def build_graph(checkpointer: SqliteSaver):
     graph.add_node("bank_statement", bank_statement_node)
     graph.add_node("id_verification", id_verification_node)
     graph.add_node("payslip", payslip_node)
-    graph.add_node("web_search", web_search_node)
     graph.add_node("fraud", fraud_node)
     graph.add_node("risk_assessment", risk_assessment_node)
     graph.add_node("approval", approval_node)
@@ -486,8 +445,7 @@ def build_graph(checkpointer: SqliteSaver):
     graph.add_edge("bureau", "bank_statement")
     graph.add_edge("bank_statement", "id_verification")
     graph.add_edge("id_verification", "payslip")
-    graph.add_edge("payslip", "web_search")
-    graph.add_edge("web_search", "fraud")
+    graph.add_edge("payslip", "fraud")
     graph.add_edge("fraud", "risk_assessment")
     graph.add_edge("risk_assessment", "approval")
     graph.add_edge("approval", END)

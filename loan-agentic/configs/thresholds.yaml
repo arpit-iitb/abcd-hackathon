@@ -20,6 +20,7 @@ fraud:
 id:
   name_match_min_score: 0.8
   face_match_min_score: 0.75
+  face_match_uncertain_score: 0.6
   face_match_enabled: true
   ocr_enabled: true
 payslip:

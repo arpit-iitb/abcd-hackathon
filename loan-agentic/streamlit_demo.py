@@ -450,7 +450,6 @@ def live_run(graph, state: Dict[str, Any], thread_id: str, log_container) -> Dic
         "bank_statement",
         "id_verification",
         "payslip",
-        "web_search",
         "fraud",
         "risk_assessment",
         "approval",
@@ -659,11 +658,25 @@ if st.session_state.page == "leads":
                 st.markdown("<div id='agent-outputs'></div>", unsafe_allow_html=True)
                 st.markdown("<div class='section-title'>Agent Outputs</div>", unsafe_allow_html=True)
                 results = final_state.get("results", {}) if isinstance(final_state, dict) else {}
-                web_search_output = (results.get("web_search") or {}).get("output", {}) if isinstance(results, dict) else {}
+                fraud_output = (results.get("fraud") or {}).get("output", {}) if isinstance(results, dict) else {}
+                web_search_output = fraud_output.get("web_search", {}) if isinstance(fraud_output, dict) else {}
                 web_summary = web_search_output.get("summary")
+                web_sources = web_search_output.get("sources") or []
                 if web_summary:
+                    sources_html = ""
+                    if isinstance(web_sources, list) and web_sources:
+                        links = []
+                        for source in web_sources[:3]:
+                            if not isinstance(source, dict):
+                                continue
+                            title = source.get("title") or source.get("url") or "source"
+                            url = source.get("url")
+                            if url:
+                                links.append(f"<li><a href='{url}' target='_blank'>{title}</a></li>")
+                        if links:
+                            sources_html = "<ul>" + "".join(links) + "</ul>"
                     st.markdown(
-                        f"<div class='summary-card summary-ok'><strong>Web Search Summary</strong><br>{web_summary}</div>",
+                        f"<div class='summary-card summary-ok'><strong>Web Search Summary</strong><br>{web_summary}{sources_html}</div>",
                         unsafe_allow_html=True,
                     )
 

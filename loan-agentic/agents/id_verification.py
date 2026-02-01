@@ -89,6 +89,7 @@ def run_id_verification(payload: Dict[str, Any], config: Dict[str, Any], prompts
     ocr_enabled = bool(thresholds.get("ocr_enabled", False))
     face_match_enabled = bool(thresholds.get("face_match_enabled", True))
     face_match_min_score = float(thresholds.get("face_match_min_score", 0.75))
+    face_match_uncertain_score = float(thresholds.get("face_match_uncertain_score", 0.6))
 
     if not aadhaar_parsed and not pan_parsed and aadhaar_image and not ocr_enabled:
         result = AgentResultBase(
@@ -130,9 +131,16 @@ def run_id_verification(payload: Dict[str, Any], config: Dict[str, Any], prompts
     match_boolean = match_score >= min_score
 
     face_match_score = _base64_similarity(aadhaar_image, selfie_image) if face_match_enabled else None
-    face_match_boolean = (
-        face_match_score >= face_match_min_score if isinstance(face_match_score, (int, float)) else None
-    )
+    if not face_match_enabled:
+        face_match_label = "Not Sure"
+    elif face_match_score is None:
+        face_match_label = "Not Sure"
+    elif face_match_score >= face_match_min_score:
+        face_match_label = "Matched"
+    elif face_match_score < face_match_uncertain_score:
+        face_match_label = "Not Matched"
+    else:
+        face_match_label = "Not Sure"
 
     extracted_id_masked = {}
     if isinstance(aadhaar_parsed, dict):
@@ -146,20 +154,23 @@ def run_id_verification(payload: Dict[str, Any], config: Dict[str, Any], prompts
         # Use raw payload so OCR/face matching can consume image_base64.
         return run_llm_agent("id_verification", payload, config, prompts)
 
-    summary = f"Name match={match_boolean} (score {match_score:.2f}); Face match={face_match_boolean}."
+    summary = f"Name match={match_boolean} (score {match_score:.2f}); Face match={face_match_label}."
     output_payload = {
         "summary": summary,
         "name_match": match_boolean,
         "match_score": match_score,
         "extracted_name": extracted_name,
         "extracted_id_masked": extracted_id_masked,
-        "face_match": face_match_boolean,
-        "face_match_score": face_match_score,
+        "face_match": face_match_label,
     }
 
     rationale_summary = [
         f"name_match_score={match_score:.2f} vs threshold={min_score}",
-        f"face_match_score={face_match_score} vs threshold={face_match_min_score}" if face_match_enabled else "face_match_disabled",
+        (
+            f"face_match_score={face_match_score} vs threshold={face_match_min_score} (uncertain<{face_match_uncertain_score})"
+            if face_match_enabled
+            else "face_match_disabled"
+        ),
     ]
     if missing_data:
         rationale_summary.append(f"Missing data: {', '.join(missing_data)}")
@@ -185,6 +196,7 @@ def run_id_verification(payload: Dict[str, Any], config: Dict[str, Any], prompts
             "match_threshold": min_score,
             "face_match_score": face_match_score,
             "face_match_threshold": face_match_min_score,
+            "face_match_uncertain_score": face_match_uncertain_score,
         },
         confidence=0.9 if not missing_data else 0.4,
         output=output_payload,

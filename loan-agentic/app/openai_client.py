@@ -46,3 +46,15 @@ def get_llm_client(model: str = None, temperature: float = None):
     client = ChatOpenAI(api_key=api_key, model=model_name, temperature=temp_value)
     _CLIENTS[key] = client
     return client
+
+
+def get_openai_client():
+    api_key = _require_api_key()
+    key = ("openai", api_key)
+    if key in _CLIENTS:
+        return _CLIENTS[key]
+    from openai import OpenAI
+
+    client = OpenAI(api_key=api_key)
+    _CLIENTS[key] = client
+    return client

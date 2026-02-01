@@ -18,15 +18,15 @@ user_template: |
   - Use the attached Aadhaar image and selfie image (provided as image inputs) to:
     - OCR the Aadhaar to extract the name (if parsed_json missing).
     - Compare face similarity between Aadhaar photo and selfie.
-  - Compare selfie vs Aadhaar image using face_match_min_score.
-  - Output name_match, match_score, face_match, face_match_score, extracted_name, extracted_id_masked.
+  - Compare selfie vs Aadhaar image using face_match_min_score and face_match_uncertain_score.
+  - Output face_match as one of: "Matched" | "Not Sure" | "Not Matched" (no numeric score in output).
+  - Output name_match, match_score, face_match, extracted_name, extracted_id_masked.
   - If OCR not enabled and only images are provided: status=insufficient_data.
 
   OUTPUT_JSON_SCHEMA (AgentResultBase):
   - output.summary: string (concise human-readable summary)
   - output.name_match: boolean
   - output.match_score: number 0..1
-  - output.face_match: boolean|null
-  - output.face_match_score: number 0..1|null
+  - output.face_match: "Matched"|"Not Sure"|"Not Matched"
   - output.extracted_name: string|null
   - output.extracted_id_masked: {aadhaar_last4?, pan_masked?}

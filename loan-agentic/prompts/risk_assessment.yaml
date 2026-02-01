@@ -17,7 +17,7 @@ user_template: |
   - Use config.thresholds.risk.request_to_balance_multiplier_low/medium/high to bucket the ratio.
   - Use config.thresholds.risk.adjustment_by_suspicious_grade (low/medium/high -> adjustment).
   - Use config.thresholds.risk.adjustment_by_request_to_balance (low/medium/high -> adjustment).
-  - Consider web_search.output summary and confidence grades; weight low-confidence results lightly.
+  - Consider web_search.summary and confidence grades; weight low-confidence results lightly.
   - Provide risk_factors list and calculations.
   - If any required field or mapping is missing: status=insufficient_data and list missing fields. Do not guess.
 

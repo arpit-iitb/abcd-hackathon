@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 from app.state import AgentResultBase, ErrorItem
 from app.utils.masking import mask_sensitive
 from app.llm_runner import llm_enabled, run_llm_agent
+from agents.web_search import run_web_search_agent
 
 
 def _income_diff_ratio(a: Optional[float], b: Optional[float]) -> Optional[float]:
@@ -47,17 +48,43 @@ def run_fraud(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[str
     payslip_result = payload.get("payslip") or {}
     id_result = payload.get("id_verification") or {}
     bureau_result = payload.get("bureau") or {}
-    web_search_result = payload.get("web_search") or {}
-
     bank_output = _get_output(bank_result)
     payslip_output = _get_output(payslip_result)
     id_output = _get_output(id_result)
     bureau_output = _get_output(bureau_result)
-    web_output = _get_output(web_search_result)
+    lead = payload.get("lead", {}) if isinstance(payload, dict) else {}
+    employer = payslip_output.get("employer") or payslip_output.get("employer_name") or ""
 
     bank_salary = bank_output.get("salary_estimate")
     payslip_income = payslip_output.get("monthly_income_estimate")
     name_match = id_output.get("name_match")
+    face_match_label = id_output.get("face_match")
+
+    web_search_result = {}
+    web_cfg = config.get("web_search") or {}
+    if face_match_label == "Not Sure" and bool(web_cfg.get("enabled", False)):
+        web_payload = {"lead": lead, "employer": employer}
+        web_search_result = run_web_search_agent(web_payload, config, prompts)
+    elif bool(web_cfg.get("enabled", False)):
+        web_search_result = {
+            "agent_name": "web_search",
+            "status": "ok",
+            "errors": [],
+            "missing_data": [],
+            "rationale_summary": ["Web search not triggered (face match confident)."],
+            "evidence": {},
+            "calculations": {},
+            "confidence": 0.3,
+            "output": {
+                "summary": "Web search not triggered (face match confident).",
+                "applicant_profile": "Not searched.",
+                "employer_profile": "Not searched.",
+                "confidence_applicant": "low",
+                "confidence_employer": "low",
+                "sources": [],
+            },
+        }
+    web_output = _get_output(web_search_result)
 
     missing_data: List[str] = []
     if bank_salary is None:
@@ -76,15 +103,31 @@ def run_fraud(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[str
             errors=[],
             missing_data=missing_data,
             rationale_summary=[f"Missing data: {', '.join(missing_data)}"],
-            evidence=mask_sensitive({"bank_statement": bank_output, "payslip": payslip_output, "id_verification": id_output, "bureau": bureau_output}),
+            evidence=mask_sensitive(
+                {
+                    "bank_statement": bank_output,
+                    "payslip": payslip_output,
+                    "id_verification": id_output,
+                    "bureau": bureau_output,
+                    "web_search": web_output,
+                }
+            ),
             calculations={},
             confidence=0.4,
-            output={},
+            output={"web_search": web_output} if web_output else {},
         )
         return result.model_dump(mode="json")
 
     if llm_enabled(config, "fraud"):
-        return run_llm_agent("fraud", mask_sensitive(payload), config, prompts)
+        llm_payload = dict(payload)
+        llm_payload["web_search"] = web_search_result
+        llm_result = run_llm_agent("fraud", mask_sensitive(llm_payload), config, prompts)
+        if isinstance(llm_result, dict) and llm_result.get("status") == "ok":
+            output_block = llm_result.get("output", {})
+            if isinstance(output_block, dict) and "web_search" not in output_block:
+                output_block["web_search"] = web_output or {}
+                llm_result["output"] = output_block
+        return llm_result
 
     tolerance = float(fraud_cfg.get("income_tolerance_ratio", 0.2))
     low_score = float(fraud_cfg.get("name_match_low_score", 0.5))
@@ -149,7 +192,7 @@ def run_fraud(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[str
             "payslip_income": payslip_income,
             "diff_ratio": diff_ratio,
         },
-        "web_search": {"enabled": False, "queries": [], "results_summary": "web_search_skipped"},
+        "web_search": web_output or {"summary": "web_search_not_run"},
     }
 
     rationale_summary = [f"fraud_grade={fraud_grade}"]
@@ -168,9 +211,9 @@ def run_fraud(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[str
                 "payslip_income": payslip_income,
                 "name_match": name_match,
                 "match_score": match_score,
-                "web_search_summary": web_output.get("summary"),
-                "web_search_confidence_applicant": web_output.get("confidence_applicant"),
-                "web_search_confidence_employer": web_output.get("confidence_employer"),
+                "web_search_summary": web_output.get("summary") if isinstance(web_output, dict) else None,
+                "web_search_confidence_applicant": web_output.get("confidence_applicant") if isinstance(web_output, dict) else None,
+                "web_search_confidence_employer": web_output.get("confidence_employer") if isinstance(web_output, dict) else None,
             }
         ),
         calculations={"diff_ratio": diff_ratio, "tolerance": tolerance, "name_match_low_score": low_score},

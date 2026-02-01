@@ -39,4 +39,4 @@ def test_graph_smoke():
     approval = result.get("results", {}).get("approval", {})
     assert "decision" in approval.get("output", {})
     traces = result.get("traces", {})
-    assert len(traces) == 9
+    assert len(traces) == 8

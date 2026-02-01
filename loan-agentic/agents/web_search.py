@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import json
 from typing import Any, Dict, List
 
-from app.llm_runner import run_llm_agent
+from app.llm_runner import resolve_model_config
+from app.prompt_loader import render_prompt
 from app.state import AgentResultBase, ErrorItem
 from app.utils.masking import mask_sensitive
-from app.utils.web_search import run_web_search
+from app.utils.web_search import run_openai_web_search
 
 
 def _build_queries(name: str, city: str, company: str) -> List[str]:
@@ -21,107 +23,8 @@ def _build_queries(name: str, city: str, company: str) -> List[str]:
     return queries
 
 
-def _normalize_text(text: str) -> str:
-    return (text or "").lower()
-
-
-def _extract_results(search_results: Dict[str, Any]) -> List[Dict[str, Any]]:
-    results_summary = search_results.get("results_summary", [])
-    all_results: List[Dict[str, Any]] = []
-    if isinstance(results_summary, list):
-        for item in results_summary:
-            if not isinstance(item, dict):
-                continue
-            for result in item.get("results", []) or []:
-                if isinstance(result, dict):
-                    all_results.append(result)
-    return all_results
-
-
-def _summarize_results(
-    results: List[Dict[str, Any]],
-    name: str,
-    city: str,
-    employer: str,
-) -> Dict[str, Any]:
-    name_norm = _normalize_text(name)
-    city_norm = _normalize_text(city)
-    employer_norm = _normalize_text(employer)
-
-    applicant_hits: List[Dict[str, Any]] = []
-    employer_hits: List[Dict[str, Any]] = []
-
-    for item in results:
-        title = _normalize_text(item.get("title", ""))
-        snippet = _normalize_text(item.get("snippet", ""))
-        combined = f"{title} {snippet}"
-        if name_norm and name_norm in combined:
-            applicant_hits.append(item)
-        if employer_norm and employer_norm in combined:
-            employer_hits.append(item)
-
-    def _top_titles(items: List[Dict[str, Any]], limit: int = 2) -> List[str]:
-        titles = []
-        for item in items[:limit]:
-            title = item.get("title") or ""
-            if title:
-                titles.append(title)
-        return titles
-
-    applicant_titles = _top_titles(applicant_hits)
-    employer_titles = _top_titles(employer_hits)
-
-    applicant_conf = "low"
-    employer_conf = "low"
-    if len(applicant_hits) >= 2:
-        applicant_conf = "medium"
-    if len(employer_hits) >= 2:
-        employer_conf = "medium"
-    if name_norm and employer_norm:
-        for item in applicant_hits:
-            combined = _normalize_text(f"{item.get('title','')} {item.get('snippet','')}")
-            if employer_norm in combined:
-                applicant_conf = "high"
-                break
-    if employer_norm and (employer_norm in " ".join(_normalize_text(t) for t in employer_titles)):
-        employer_conf = "medium"
-
-    applicant_summary = "No clear applicant-specific results found."
-    if applicant_titles:
-        applicant_summary = f"Top applicant-related results: {', '.join(applicant_titles)}."
-
-    employer_summary = "No clear employer-specific results found."
-    if employer_titles:
-        employer_summary = f"Top employer-related results: {', '.join(employer_titles)}."
-
-    summary_parts = []
-    if applicant_titles:
-        summary_parts.append(f"Applicant: {applicant_titles[0]}")
-    else:
-        summary_parts.append("Applicant: no clear matches")
-    if employer_titles:
-        summary_parts.append(f"Employer: {employer_titles[0]}")
-    else:
-        summary_parts.append("Employer: no clear matches")
-
-    summary = "; ".join(summary_parts)
-    if city_norm and name_norm and applicant_hits:
-        summary = f"{summary} (city query matched: {city})."
-
-    confidence_score = 0.2
-    if applicant_hits or employer_hits:
-        confidence_score = 0.4
-    if applicant_conf == "high" or employer_conf == "high":
-        confidence_score = 0.6
-
-    return {
-        "summary": summary,
-        "applicant_profile": applicant_summary,
-        "employer_profile": employer_summary,
-        "confidence_applicant": applicant_conf,
-        "confidence_employer": employer_conf,
-        "confidence_score": confidence_score,
-    }
+def _serialize(obj: Any) -> str:
+    return json.dumps(obj, ensure_ascii=True)
 
 
 def run_web_search_agent(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[str, Any]) -> Dict[str, Any]:
@@ -149,11 +52,15 @@ def run_web_search_agent(payload: Dict[str, Any], config: Dict[str, Any], prompt
                 "employer_profile": "Not searched (disabled).",
                 "confidence_applicant": "low",
                 "confidence_employer": "low",
+                "sources": [],
             },
         )
         return result.model_dump(mode="json")
 
     queries = _build_queries(str(name), str(city), str(employer))
+    max_queries = int(web_cfg.get("max_queries", len(queries) or 0))
+    if max_queries and len(queries) > max_queries:
+        queries = queries[:max_queries]
     if not queries:
         result = AgentResultBase(
             agent_name="web_search",
@@ -168,100 +75,100 @@ def run_web_search_agent(payload: Dict[str, Any], config: Dict[str, Any], prompt
         )
         return result.model_dump(mode="json")
 
-    search_results = run_web_search(queries, web_cfg)
-    results_summary = search_results.get("results_summary", [])
-    provider_errors = []
-    has_any_results = False
-    if isinstance(results_summary, list):
-        for item in results_summary:
-            if not isinstance(item, dict):
-                continue
-            if item.get("error"):
-                provider_errors.append(str(item.get("error")))
-            if item.get("results"):
-                has_any_results = True
-
-    if provider_errors and not has_any_results:
-        result = AgentResultBase(
-            agent_name="web_search",
-            status="ok",
-            errors=[],
-            missing_data=[],
-            rationale_summary=["Web search provider unavailable; returning low-confidence placeholder summary."],
-            evidence=mask_sensitive({"search_results": search_results}),
-            calculations={},
-            confidence=0.1,
-            output={
-                "summary": "Web search provider unavailable. No reliable applicant or employer profile found.",
-                "applicant_profile": "Inconclusive (provider unavailable).",
-                "employer_profile": "Inconclusive (provider unavailable).",
-                "confidence_applicant": "low",
-                "confidence_employer": "low",
-            },
-        )
-        return result.model_dump(mode="json")
-
-    if not has_any_results:
-        result = AgentResultBase(
-            agent_name="web_search",
-            status="ok",
-            errors=[],
-            missing_data=[],
-            rationale_summary=["Web search returned no results for applicant/employer queries."],
-            evidence=mask_sensitive({"search_results": search_results}),
-            calculations={},
-            confidence=0.2,
-            output={
-                "summary": "No web search results found for the applicant or employer.",
-                "applicant_profile": "No results found.",
-                "employer_profile": "No results found.",
-                "confidence_applicant": "low",
-                "confidence_employer": "low",
-            },
-        )
-        return result.model_dump(mode="json")
     llm_payload = {
         "lead": lead,
         "employer": employer,
         "queries": queries,
-        "search_results": search_results,
     }
 
-    llm_result = run_llm_agent("web_search", llm_payload, config, prompts)
-    if isinstance(llm_result, dict) and llm_result.get("status") == "ok":
-        return llm_result
-
-    results = _extract_results(search_results)
-    fallback_summary = _summarize_results(results, str(name), str(city), str(employer))
-    error_note = None
-    if isinstance(llm_result, dict):
-        errors = llm_result.get("errors", [])
-        if errors:
-            error_note = errors[0].get("message") if isinstance(errors[0], dict) else None
-
-    warning = ErrorItem(
-        code="llm_fallback",
-        message="LLM summarization failed; using rule-based summary."
-        + (f" ({error_note})" if error_note else ""),
-        where="web_search.llm_summary",
-        severity="warning",
+    system_prompt, user_prompt = render_prompt(
+        prompts,
+        "web_search",
+        input_json=_serialize(llm_payload),
+        config_json=_serialize(config),
     )
+    model_cfg = resolve_model_config(config, "web_search")
+    include_sources = bool(web_cfg.get("include_sources", True))
 
-    fallback = AgentResultBase(
-        agent_name="web_search",
-        status="ok",
-        errors=[warning],
-        missing_data=[],
-        rationale_summary=["LLM summarization failed; used rule-based summary from search results."],
-        evidence=mask_sensitive({"search_results": search_results}),
-        calculations={},
-        confidence=float(fallback_summary.get("confidence_score", 0.3)),
-        output={
-            "summary": fallback_summary.get("summary"),
-            "applicant_profile": fallback_summary.get("applicant_profile"),
-            "employer_profile": fallback_summary.get("employer_profile"),
-            "confidence_applicant": fallback_summary.get("confidence_applicant"),
-            "confidence_employer": fallback_summary.get("confidence_employer"),
-        },
-    )
-    return fallback.model_dump(mode="json")
+    try:
+        response = run_openai_web_search(
+            system_prompt,
+            user_prompt,
+            model=model_cfg.get("model", "gpt-5.2"),
+            temperature=float(model_cfg.get("temperature", 0.1)),
+            include_sources=include_sources,
+        )
+    except Exception as exc:
+        error = ErrorItem(
+            code="web_search_runtime_error",
+            message=str(exc),
+            where="web_search_call",
+            severity="fatal",
+        )
+        result = AgentResultBase(
+            agent_name="web_search",
+            status="error",
+            errors=[error],
+            missing_data=[],
+            rationale_summary=["Web search call failed."],
+            evidence=mask_sensitive({"lead": lead, "employer": employer, "queries": queries}),
+            calculations={},
+            confidence=0.0,
+            output={},
+        )
+        return result.model_dump(mode="json")
+
+    parsed = response.get("parsed")
+    sources = response.get("sources", []) or []
+    queries_used = response.get("queries", []) or []
+    if not parsed:
+        error = ErrorItem(
+            code="web_search_parse_error",
+            message="Failed to parse JSON output from web search LLM.",
+            where="web_search_response",
+            severity="fatal",
+        )
+        result = AgentResultBase(
+            agent_name="web_search",
+            status="error",
+            errors=[error],
+            missing_data=[],
+            rationale_summary=["Web search LLM output was not valid JSON."],
+            evidence=mask_sensitive({"queries": queries, "queries_used": queries_used, "sources": sources}),
+            calculations={},
+            confidence=0.0,
+            output={},
+        )
+        return result.model_dump(mode="json")
+
+    parsed["agent_name"] = "web_search"
+    output = parsed.get("output", {})
+    if isinstance(output, dict):
+        if sources and not output.get("sources"):
+            output["sources"] = sources
+        if queries_used and not output.get("queries_used"):
+            output["queries_used"] = queries_used
+        parsed["output"] = output
+
+    try:
+        validated = AgentResultBase.model_validate(parsed)
+        return validated.model_dump(mode="json")
+    except Exception as exc:
+        error = ErrorItem(
+            code="web_search_validation_error",
+            message=str(exc),
+            where="web_search_response",
+            severity="fatal",
+        )
+        result = AgentResultBase(
+            agent_name="web_search",
+            status="error",
+            errors=[error],
+            missing_data=[],
+            rationale_summary=["Web search LLM output failed schema validation."],
+            evidence=mask_sensitive({"queries": queries, "queries_used": queries_used, "sources": sources}),
+            calculations={},
+            confidence=0.0,
+            output={},
+        )
+        return result.model_dump(mode="json")

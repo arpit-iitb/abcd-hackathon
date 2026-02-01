@@ -22,7 +22,7 @@ def test_id_verification_match():
     result = run_id_verification(payload, config, {})
     assert result["status"] == "ok"
     assert result["output"]["name_match"] is True
-    assert result["output"]["face_match"] is True
+    assert result["output"]["face_match"] == "Matched"
 
 
 def test_payslip_parsing_sample():
