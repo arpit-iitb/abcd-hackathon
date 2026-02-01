@@ -3,6 +3,11 @@ lead_filter:
   allowed_product_types: ["personal_loan"]
   allowed_loan_purposes: ["personal_loan"]
   max_requested_amount: 200000
+city_tier_map:
+  bengaluru: tier1
+  mumbai: tier1
+  delhi: metro
+  jaipur: tier2
 sanction_policy:
   max_multiplier_of_avg_balance: 10.0
   cap_amount: 500000

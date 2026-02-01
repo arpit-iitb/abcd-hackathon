@@ -14,6 +14,36 @@ def run_payslip(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[s
     documents = payload.get("documents", {}) if isinstance(payload, dict) else {}
     payslip_doc = documents.get("payslip_doc") or {}
     parsed = payslip_doc.get("parsed_json") if isinstance(payslip_doc, dict) else None
+    raw_text = parsed.get("raw_text") if isinstance(parsed, dict) else None
+    fallback_parsed = parsed.get("fallback_parsed") if isinstance(parsed, dict) else None
+
+    if raw_text:
+        if llm_enabled(config, "payslip"):
+            llm_result = run_llm_agent("payslip", mask_sensitive(payload), config, prompts)
+            if isinstance(llm_result, dict) and llm_result.get("status") == "ok":
+                return llm_result
+            if isinstance(fallback_parsed, dict) and fallback_parsed:
+                parsed = fallback_parsed
+                raw_text = None
+            else:
+                if isinstance(llm_result, dict) and llm_result.get("errors"):
+                    llm_result.setdefault("missing_data", []).append("documents.payslip_doc.parsed_json.raw_text")
+                    llm_result.setdefault("rationale_summary", []).append(
+                        "LLM parse failed for payslip raw_text; used fallback."
+                    )
+                return llm_result
+        result = AgentResultBase(
+            agent_name="payslip",
+            status="insufficient_data",
+            errors=[],
+            missing_data=["documents.payslip_doc.parsed_json.raw_text"],
+            rationale_summary=["OCR/LLM parsing disabled; cannot parse payslip raw_text."],
+            evidence=mask_sensitive({"payslip_doc": {"raw_text": raw_text[:500] if isinstance(raw_text, str) else ""}}),
+            calculations={},
+            confidence=0.2,
+            output={},
+        )
+        return result.model_dump(mode="json")
 
     if not parsed:
         if payslip_doc.get("image_base64") and not ocr_enabled:
@@ -101,22 +131,4 @@ def run_payslip(payload: Dict[str, Any], config: Dict[str, Any], prompts: Dict[s
         confidence=0.9 if not missing_data else 0.4,
         output=output_payload,
     )
-    rule_result = result.model_dump(mode="json")
-
-    if not missing_data and llm_enabled(config, "payslip"):
-        llm_result = run_llm_agent("payslip", mask_sensitive(payload), config, prompts)
-        if isinstance(llm_result, dict) and llm_result.get("status") == "ok":
-            return llm_result
-        if isinstance(llm_result, dict) and llm_result.get("errors"):
-            rule_result.setdefault("errors", []).append(
-                {
-                    "code": "llm_fallback",
-                    "message": "LLM parse/validation failed; returning rule-based payslip result.",
-                    "where": "payslip.llm",
-                    "severity": "warning",
-                }
-            )
-            rule_result["rationale_summary"] = list(rule_result.get("rationale_summary", [])) + [
-                "LLM output invalid; used rule-based parsed_json."
-            ]
-    return rule_result
+    return result.model_dump(mode="json")
